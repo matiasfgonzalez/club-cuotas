@@ -26,6 +26,7 @@ import {
   Clock,
   CheckCircle2,
   AlertTriangle,
+  UserCheck,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -54,7 +55,14 @@ export default async function PaginaDetalleJugador({ params }: PageProps) {
   const jugador = await db.jugador.findUnique({
     where: { id },
     include: {
-      usuario: true,
+      usuarios: {
+        select: {
+          id: true,
+          nombreCompleto: true,
+          email: true,
+          activo: true,
+        },
+      },
       inscripciones: {
         include: {
           torneo: true,
@@ -110,7 +118,7 @@ export default async function PaginaDetalleJugador({ params }: PageProps) {
           </Button>
           <div>
             <h1 className="text-3xl font-bold text-white">
-              {jugador.usuario.nombreCompleto}
+              {jugador.nombre}
             </h1>
             <p className="text-zinc-400 mt-1">
               {jugador.posicion || 'Sin posición asignada'}
@@ -120,12 +128,14 @@ export default async function PaginaDetalleJugador({ params }: PageProps) {
         <Badge
           variant="outline"
           className={
-            jugador.usuario.activo
+            jugador.usuarios.length > 0
               ? 'border-emerald-500/30 text-emerald-400'
-              : 'border-red-500/30 text-red-400'
+              : 'border-zinc-600 text-zinc-400'
           }
         >
-          {jugador.usuario.activo ? 'Activo' : 'Inactivo'}
+          {jugador.usuarios.length > 0 
+            ? `${jugador.usuarios.length} usuario(s) asociado(s)`
+            : 'Sin usuarios asociados'}
         </Badge>
       </div>
 
@@ -140,14 +150,24 @@ export default async function PaginaDetalleJugador({ params }: PageProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center gap-3">
-              <Mail className="h-4 w-4 text-zinc-500" />
-              <span className="text-zinc-300">{jugador.usuario.email}</span>
-            </div>
-            {jugador.usuario.telefono && (
+            {jugador.cuit && (
+              <div className="flex items-center gap-3">
+                <CreditCard className="h-4 w-4 text-zinc-500" />
+                <span className="text-zinc-300">CUIT: {jugador.cuit}</span>
+              </div>
+            )}
+            {jugador.usuarios.map(usr => (
+              <div key={usr.id} className="flex items-center gap-3">
+                <Mail className="h-4 w-4 text-zinc-500" />
+                <span className="text-zinc-300">
+                  {usr.email} <span className="text-zinc-500 text-xs">({usr.nombreCompleto})</span>
+                </span>
+              </div>
+            ))}
+            {jugador.telefono && (
               <div className="flex items-center gap-3">
                 <Phone className="h-4 w-4 text-zinc-500" />
-                <span className="text-zinc-300">{jugador.usuario.telefono}</span>
+                <span className="text-zinc-300">{jugador.telefono}</span>
               </div>
             )}
             {jugador.fechaNacimiento && (

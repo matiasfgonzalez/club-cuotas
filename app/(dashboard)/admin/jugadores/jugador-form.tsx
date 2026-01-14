@@ -1,6 +1,6 @@
 'use client'
 
-// Formulario de creación de jugador
+// Formulario de creación de jugador (independiente de usuario)
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { User, Loader2, ArrowLeft, Trophy } from 'lucide-react'
+import { User, Loader2, ArrowLeft, Trophy, CreditCard } from 'lucide-react'
 import Link from 'next/link'
 
 interface Torneo {
@@ -54,8 +54,7 @@ export function JugadorForm({ torneos }: JugadorFormProps) {
   const [isLoading, setIsLoading] = useState(false)
 
   const [formData, setFormData] = useState({
-    email: '',
-    nombreCompleto: '',
+    nombre: '',
     telefono: '',
     dni: '',
     cuit: '',
@@ -86,8 +85,7 @@ export function JugadorForm({ torneos }: JugadorFormProps) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: formData.email,
-          nombreCompleto: formData.nombreCompleto,
+          nombre: formData.nombre,
           telefono: formData.telefono || null,
           dni: formData.dni || null,
           cuit: formData.cuit || null,
@@ -120,51 +118,32 @@ export function JugadorForm({ torneos }: JugadorFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Datos de cuenta */}
+      {/* Datos personales */}
       <Card className="bg-zinc-900 border-zinc-800">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <User className="h-5 w-5 text-emerald-400" />
-            Datos de la cuenta
+            Datos del jugador
           </CardTitle>
           <CardDescription>
-            Información básica del usuario
+            Información básica del jugador
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-zinc-300">
-                Email *
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                placeholder="jugador@email.com"
-                className="bg-zinc-800 border-zinc-700 text-white"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="nombreCompleto" className="text-zinc-300">
-                Nombre completo *
-              </Label>
-              <Input
-                id="nombreCompleto"
-                value={formData.nombreCompleto}
-                onChange={(e) =>
-                  setFormData({ ...formData, nombreCompleto: e.target.value })
-                }
-                placeholder="Juan Pérez"
-                className="bg-zinc-800 border-zinc-700 text-white"
-                required
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="nombre" className="text-zinc-300">
+              Nombre completo *
+            </Label>
+            <Input
+              id="nombre"
+              value={formData.nombre}
+              onChange={(e) =>
+                setFormData({ ...formData, nombre: e.target.value })
+              }
+              placeholder="Juan Pérez"
+              className="bg-zinc-800 border-zinc-700 text-white"
+              required
+            />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -202,8 +181,9 @@ export function JugadorForm({ torneos }: JugadorFormProps) {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="cuit" className="text-zinc-300">
-                CUIT (único)
+              <Label htmlFor="cuit" className="text-zinc-300 flex items-center gap-1">
+                <CreditCard className="h-4 w-4" />
+                CUIT (único - para asociación)
               </Label>
               <Input
                 id="cuit"
@@ -214,6 +194,9 @@ export function JugadorForm({ torneos }: JugadorFormProps) {
                 placeholder="20-12345678-9"
                 className="bg-zinc-800 border-zinc-700 text-white"
               />
+              <p className="text-xs text-zinc-500">
+                El usuario podrá asociarse usando este CUIT
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -353,7 +336,7 @@ export function JugadorForm({ torneos }: JugadorFormProps) {
 
         <Button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoading || !formData.nombre.trim()}
           className="bg-emerald-500 hover:bg-emerald-600 text-white"
         >
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

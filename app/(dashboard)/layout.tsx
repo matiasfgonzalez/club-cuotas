@@ -26,9 +26,10 @@ export default async function DashboardLayout({
   // Verificar si el usuario existe en la base de datos
   let usuario = await db.usuario.findUnique({
     where: { id: userId },
+    include: { jugador: true },
   })
 
-  // Si no existe, crearlo automáticamente como jugador usando upsert
+  // Si no existe, crearlo automáticamente (sin jugador asociado)
   if (!usuario && user) {
     usuario = await db.usuario.upsert({
       where: { id: userId },
@@ -39,16 +40,9 @@ export default async function DashboardLayout({
         nombreCompleto:
           `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Usuario',
         rol: 'JUGADOR',
+        // No se crea jugador automáticamente - debe asociarse después
       },
-    })
-
-    // Crear el perfil de jugador si no existe
-    await db.jugador.upsert({
-      where: { usuarioId: userId },
-      update: {},
-      create: {
-        usuarioId: userId,
-      },
+      include: { jugador: true },
     })
   }
 

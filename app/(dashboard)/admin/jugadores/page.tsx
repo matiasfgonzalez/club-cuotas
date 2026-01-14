@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Plus, Users, Search, Mail, Phone } from 'lucide-react'
+import { Plus, Users, Search, Phone, UserCheck, UserX } from 'lucide-react'
 
 export default async function PaginaJugadores() {
   const { userId } = await auth()
@@ -41,7 +41,13 @@ export default async function PaginaJugadores() {
   const jugadores = await db.jugador.findMany({
     orderBy: { creadoEn: 'desc' },
     include: {
-      usuario: true,
+      usuarios: {
+        select: {
+          id: true,
+          email: true,
+          nombreCompleto: true,
+        },
+      },
       inscripciones: {
         include: { torneo: true },
         where: { activo: true },
@@ -74,7 +80,7 @@ export default async function PaginaJugadores() {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
         <Input
-          placeholder="Buscar jugador por nombre o email..."
+          placeholder="Buscar jugador por nombre o CUIT..."
           className="pl-10 bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-500"
         />
       </div>
@@ -107,7 +113,7 @@ export default async function PaginaJugadores() {
                 <TableHead className="text-zinc-400">Contacto</TableHead>
                 <TableHead className="text-zinc-400">Torneos</TableHead>
                 <TableHead className="text-zinc-400">Cuotas Pendientes</TableHead>
-                <TableHead className="text-zinc-400">Estado</TableHead>
+                <TableHead className="text-zinc-400">Usuarios</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -123,12 +129,12 @@ export default async function PaginaJugadores() {
                     >
                       <Avatar className="h-10 w-10 bg-zinc-700">
                         <AvatarFallback className="bg-gradient-to-br from-emerald-400 to-teal-500 text-white">
-                          {jugador.usuario.nombreCompleto.charAt(0).toUpperCase()}
+                          {jugador.nombre.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-medium text-white">
-                          {jugador.usuario.nombreCompleto}
+                          {jugador.nombre}
                         </p>
                         {jugador.posicion && (
                           <p className="text-xs text-zinc-500">
@@ -141,16 +147,15 @@ export default async function PaginaJugadores() {
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      <div className="flex items-center gap-1 text-sm text-zinc-400">
-                        <Mail className="h-3 w-3" />
-                        <span className="truncate max-w-[150px]">
-                          {jugador.usuario.email}
-                        </span>
-                      </div>
-                      {jugador.usuario.telefono && (
+                      {jugador.cuit && (
+                        <p className="text-sm text-zinc-400">
+                          CUIT: {jugador.cuit}
+                        </p>
+                      )}
+                      {jugador.telefono && (
                         <div className="flex items-center gap-1 text-sm text-zinc-500">
                           <Phone className="h-3 w-3" />
-                          <span>{jugador.usuario.telefono}</span>
+                          <span>{jugador.telefono}</span>
                         </div>
                       )}
                     </div>
@@ -199,16 +204,19 @@ export default async function PaginaJugadores() {
                     )}
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={
-                        jugador.usuario.activo
-                          ? 'border-emerald-500/30 text-emerald-400'
-                          : 'border-zinc-600 text-zinc-400'
-                      }
-                    >
-                      {jugador.usuario.activo ? 'Activo' : 'Inactivo'}
-                    </Badge>
+                    {jugador.usuarios.length > 0 ? (
+                      <div className="flex items-center gap-1">
+                        <UserCheck className="h-4 w-4 text-emerald-400" />
+                        <span className="text-sm text-emerald-400">
+                          {jugador.usuarios.length} asociado{jugador.usuarios.length > 1 ? 's' : ''}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1">
+                        <UserX className="h-4 w-4 text-zinc-500" />
+                        <span className="text-sm text-zinc-500">Sin usuario</span>
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

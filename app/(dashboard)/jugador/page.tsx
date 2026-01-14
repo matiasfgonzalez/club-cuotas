@@ -41,14 +41,9 @@ export default async function PaginaJugadorDashboard() {
     },
   })
 
+  // Si no tiene jugador asociado, redirigir a la página de bienvenida
   if (!usuario?.jugador) {
-    // Crear perfil de jugador si no existe usando upsert
-    await db.jugador.upsert({
-      where: { usuarioId: userId },
-      update: {},
-      create: { usuarioId: userId },
-    })
-    redirect('/jugador')
+    redirect('/jugador/bienvenida')
   }
 
   // Obtener cuotas asignadas al jugador

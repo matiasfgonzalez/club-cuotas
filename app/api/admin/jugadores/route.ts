@@ -1,9 +1,10 @@
-// API para crear jugadores desde admin
+// API para crear y listar jugadores (sin usuario)
 
 import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
+// POST: Crear nuevo jugador
 export async function POST(request: Request) {
   try {
     const { userId } = await auth()
@@ -29,8 +30,7 @@ export async function POST(request: Request) {
 
     const body = await request.json()
     const {
-      email,
-      nombreCompleto,
+      nombre,
       telefono,
       dni,
       cuit,
@@ -42,28 +42,9 @@ export async function POST(request: Request) {
     } = body
 
     // Validar campos requeridos
-    if (!email || !email.includes('@')) {
-      return NextResponse.json(
-        { error: 'Email inválido' },
-        { status: 400 }
-      )
-    }
-
-    if (!nombreCompleto || nombreCompleto.trim().length < 2) {
+    if (!nombre || nombre.trim().length < 2) {
       return NextResponse.json(
         { error: 'El nombre es requerido (mínimo 2 caracteres)' },
-        { status: 400 }
-      )
-    }
-
-    // Verificar que el email no esté en uso
-    const emailExistente = await db.usuario.findUnique({
-      where: { email },
-    })
-
-    if (emailExistente) {
-      return NextResponse.json(
-        { error: 'Este email ya está registrado' },
         { status: 400 }
       )
     }
@@ -82,23 +63,10 @@ export async function POST(request: Request) {
       }
     }
 
-    // Generar un ID temporal para el usuario (se actualizará cuando inicie sesión con Clerk)
-    const tempUserId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-
-    // Crear usuario (sin telefono, ahora está en Jugador)
-    const usuario = await db.usuario.create({
-      data: {
-        id: tempUserId,
-        email: email.toLowerCase().trim(),
-        nombreCompleto: nombreCompleto.trim(),
-        rol: 'JUGADOR',
-      },
-    })
-
-    // Crear jugador con todos los datos
+    // Crear jugador (independiente de usuario)
     const jugador = await db.jugador.create({
       data: {
-        usuarioId: usuario.id,
+        nombre: nombre.trim(),
         telefono: telefono || null,
         dni: dni || null,
         cuit: cuit || null,
@@ -140,13 +108,68 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         success: true,
-        usuario,
         jugador,
       },
       { status: 201 }
     )
   } catch (error) {
     console.error('Error al crear jugador:', error)
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    )
+  }
+}
+
+// GET: Listar todos los jugadores
+export async function GET() {
+  try {
+    const { userId } = await auth()
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'No autorizado' },
+        { status: 401 }
+      )
+    }
+
+    // Verificar que sea administrador
+    const adminUsuario = await db.usuario.findUnique({
+      where: { id: userId },
+    })
+
+    if (adminUsuario?.rol !== 'ADMINISTRADOR') {
+      return NextResponse.json(
+        { error: 'No tienes permisos para esta acción' },
+        { status: 403 }
+      )
+    }
+
+    const jugadores = await db.jugador.findMany({
+      where: { activo: true },
+      include: {
+        usuarios: {
+          select: {
+            id: true,
+            email: true,
+            nombreCompleto: true,
+          },
+        },
+        inscripciones: {
+          include: { torneo: true },
+        },
+        _count: {
+          select: {
+            cuotasAsignadas: true,
+          },
+        },
+      },
+      orderBy: { nombre: 'asc' },
+    })
+
+    return NextResponse.json(jugadores)
+  } catch (error) {
+    console.error('Error al obtener jugadores:', error)
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

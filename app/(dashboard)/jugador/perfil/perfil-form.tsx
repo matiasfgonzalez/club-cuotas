@@ -33,6 +33,7 @@ interface PerfilFormProps {
   }
   jugador: {
     id: string
+    nombre: string
     telefono: string
     dni: string
     cuit: string
@@ -40,7 +41,7 @@ interface PerfilFormProps {
     fechaNacimiento: string
     posicion: string
     numeroCamiseta?: number
-  } | null
+  }
   clerkImageUrl?: string
 }
 
@@ -64,13 +65,14 @@ export function PerfilForm({ usuario, jugador, clerkImageUrl }: PerfilFormProps)
   
   const [formData, setFormData] = useState({
     nombreCompleto: usuario.nombreCompleto,
-    telefono: jugador?.telefono || '',
-    dni: jugador?.dni || '',
-    cuit: jugador?.cuit || '',
-    obraSocial: jugador?.obraSocial || '',
-    fechaNacimiento: jugador?.fechaNacimiento || '',
-    posicion: jugador?.posicion || '',
-    numeroCamiseta: jugador?.numeroCamiseta?.toString() || '',
+    nombre: jugador.nombre,
+    telefono: jugador.telefono,
+    dni: jugador.dni,
+    cuit: jugador.cuit,
+    obraSocial: jugador.obraSocial,
+    fechaNacimiento: jugador.fechaNacimiento,
+    posicion: jugador.posicion,
+    numeroCamiseta: jugador.numeroCamiseta?.toString() || '',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -85,6 +87,7 @@ export function PerfilForm({ usuario, jugador, clerkImageUrl }: PerfilFormProps)
         },
         body: JSON.stringify({
           nombreCompleto: formData.nombreCompleto,
+          nombre: formData.nombre,
           telefono: formData.telefono || null,
           dni: formData.dni || null,
           cuit: formData.cuit || null,
@@ -137,17 +140,32 @@ export function PerfilForm({ usuario, jugador, clerkImageUrl }: PerfilFormProps)
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="nombreCompleto" className="text-zinc-300">
-              Nombre completo
-            </Label>
-            <Input
-              id="nombreCompleto"
-              value={formData.nombreCompleto}
-              onChange={(e) => setFormData({ ...formData, nombreCompleto: e.target.value })}
-              className="bg-zinc-800 border-zinc-700 text-white"
-              required
-            />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="nombreCompleto" className="text-zinc-300">
+                Nombre en la cuenta
+              </Label>
+              <Input
+                id="nombreCompleto"
+                value={formData.nombreCompleto}
+                onChange={(e) => setFormData({ ...formData, nombreCompleto: e.target.value })}
+                className="bg-zinc-800 border-zinc-700 text-white"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="nombre" className="text-zinc-300">
+                Nombre del jugador
+              </Label>
+              <Input
+                id="nombre"
+                value={formData.nombre}
+                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                className="bg-zinc-800 border-zinc-700 text-white"
+                required
+              />
+            </div>
           </div>
         </CardContent>
       </Card>

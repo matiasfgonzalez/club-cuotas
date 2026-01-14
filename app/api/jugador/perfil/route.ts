@@ -17,7 +17,8 @@ export async function PUT(request: Request) {
 
     const body = await request.json()
     const { 
-      nombreCompleto, 
+      nombreCompleto,
+      nombre,
       telefono, 
       dni, 
       cuit, 
@@ -30,7 +31,34 @@ export async function PUT(request: Request) {
     // Validar nombre
     if (!nombreCompleto || nombreCompleto.trim().length < 2) {
       return NextResponse.json(
-        { error: 'El nombre es requerido' },
+        { error: 'El nombre de cuenta es requerido' },
+        { status: 400 }
+      )
+    }
+
+    if (!nombre || nombre.trim().length < 2) {
+      return NextResponse.json(
+        { error: 'El nombre del jugador es requerido' },
+        { status: 400 }
+      )
+    }
+
+    // Obtener usuario con jugador
+    const usuario = await db.usuario.findUnique({
+      where: { id: userId },
+      include: { jugador: true },
+    })
+
+    if (!usuario) {
+      return NextResponse.json(
+        { error: 'Usuario no encontrado' },
+        { status: 404 }
+      )
+    }
+
+    if (!usuario.jugador) {
+      return NextResponse.json(
+        { error: 'No tienes un jugador asociado' },
         { status: 400 }
       )
     }
@@ -40,7 +68,7 @@ export async function PUT(request: Request) {
       const cuitExistente = await db.jugador.findFirst({
         where: {
           cuit,
-          NOT: { usuarioId: userId },
+          NOT: { id: usuario.jugador.id },
         },
       })
 
@@ -52,7 +80,7 @@ export async function PUT(request: Request) {
       }
     }
 
-    // Actualizar usuario (solo nombreCompleto ahora)
+    // Actualizar usuario
     await db.usuario.update({
       where: { id: userId },
       data: {
@@ -60,25 +88,20 @@ export async function PUT(request: Request) {
       },
     })
 
-    // Actualizar jugador si existe
-    const jugador = await db.jugador.findUnique({
-      where: { usuarioId: userId },
+    // Actualizar jugador
+    await db.jugador.update({
+      where: { id: usuario.jugador.id },
+      data: {
+        nombre: nombre.trim(),
+        telefono: telefono || null,
+        dni: dni || null,
+        cuit: cuit || null,
+        obraSocial: obraSocial || null,
+        fechaNacimiento: fechaNacimiento ? new Date(fechaNacimiento) : null,
+        posicion: posicion || null,
+        numeroCamiseta: numeroCamiseta || null,
+      },
     })
-
-    if (jugador) {
-      await db.jugador.update({
-        where: { usuarioId: userId },
-        data: {
-          telefono: telefono || null,
-          dni: dni || null,
-          cuit: cuit || null,
-          obraSocial: obraSocial || null,
-          fechaNacimiento: fechaNacimiento ? new Date(fechaNacimiento) : null,
-          posicion: posicion || null,
-          numeroCamiseta: numeroCamiseta || null,
-        },
-      })
-    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

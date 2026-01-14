@@ -29,6 +29,11 @@ export default async function PaginaPerfil() {
     redirect('/jugador')
   }
 
+  // Si no tiene jugador asociado, redirigir a bienvenida
+  if (!usuario.jugador) {
+    redirect('/jugador/bienvenida')
+  }
+
   return (
     <div className="space-y-8">
       {/* Título */}
@@ -46,8 +51,9 @@ export default async function PaginaPerfil() {
           email: usuario.email,
           nombreCompleto: usuario.nombreCompleto,
         }}
-        jugador={usuario.jugador ? {
+        jugador={{
           id: usuario.jugador.id,
+          nombre: usuario.jugador.nombre,
           telefono: usuario.jugador.telefono || '',
           dni: usuario.jugador.dni || '',
           cuit: usuario.jugador.cuit || '',
@@ -55,7 +61,7 @@ export default async function PaginaPerfil() {
           fechaNacimiento: usuario.jugador.fechaNacimiento?.toISOString().split('T')[0] || '',
           posicion: usuario.jugador.posicion || '',
           numeroCamiseta: usuario.jugador.numeroCamiseta || undefined,
-        } : null}
+        }}
         clerkImageUrl={user?.imageUrl}
       />
     </div>

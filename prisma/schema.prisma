@@ -16,6 +16,8 @@ datasource db {
 // =====================================
 
 /// Usuario del sistema, sincronizado con Clerk
+/// Un Usuario puede tener asociado UN Jugador (opcional)
+/// Múltiples Usuarios pueden estar asociados al MISMO Jugador
 model Usuario {
   id             String     @id // ID de Clerk
   email          String     @unique
@@ -25,8 +27,10 @@ model Usuario {
   creadoEn       DateTime   @default(now())
   actualizadoEn  DateTime   @updatedAt
 
-  // Relaciones
-  jugador        Jugador?
+  // Relación con Jugador (many-to-one): muchos usuarios pueden ver un jugador
+  jugadorId      String?
+  jugador        Jugador?   @relation(fields: [jugadorId], references: [id])
+  
   pagosAprobados Pago[]     @relation("AprobadorPago")
 }
 
@@ -45,23 +49,25 @@ model Torneo {
   inscripciones InscripcionTorneo[]
 }
 
-/// Jugador del equipo, vinculado a un usuario
+/// Jugador del equipo (independiente del Usuario)
+/// Puede tener múltiples usuarios asociados que lo visualizan
 model Jugador {
   id              String    @id @default(cuid())
-  usuarioId       String    @unique
+  nombre          String    // Nombre del jugador
   telefono        String?
   dni             String?   // Número de documento
-  cuit            String?   @unique // CUIT único para evitar duplicados
+  cuit            String?   @unique // CUIT único - usado para identificar y asociar
   obraSocial      String?
   fechaNacimiento DateTime?
   posicion        String?
   numeroCamiseta  Int?
+  activo          Boolean   @default(true)
   creadoEn        DateTime  @default(now())
 
   // Relaciones
-  usuario       Usuario             @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-  inscripciones InscripcionTorneo[]
-  pagos         Pago[]
+  usuarios        Usuario[]  // Usuarios que pueden ver este jugador
+  inscripciones   InscripcionTorneo[]
+  pagos           Pago[]
   cuotasAsignadas CuotaJugador[]
 }
 
