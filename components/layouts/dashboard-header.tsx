@@ -26,6 +26,7 @@ import {
   Receipt,
   History,
   UserCircle,
+  Home,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -40,6 +41,8 @@ interface DashboardHeaderProps {
 
 // Enlaces para administradores
 const enlacesAdmin = [
+  { href: '/jugador', label: 'Mis Cuotas', icon: Home },
+  { href: '/jugador/perfil', label: 'Mi Perfil', icon: UserCircle },
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/torneos', label: 'Torneos', icon: Trophy },
   { href: '/admin/jugadores', label: 'Jugadores', icon: Users },
@@ -121,13 +124,13 @@ export function DashboardHeader({ usuario, esAdmin }: DashboardHeaderProps) {
           </Sheet>
         </div>
 
-        {/* Logo móvil */}
-        <div className="flex items-center gap-2 md:hidden">
+        {/* Logo móvil - clickeable hacia /jugador */}
+        <Link href="/jugador" className="flex items-center gap-2 md:hidden">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
             <Trophy className="w-5 h-5 text-white" />
           </div>
           <span className="font-semibold text-white">Club Cuotas</span>
-        </div>
+        </Link>
 
         {/* Espacio vacío en desktop */}
         <div className="hidden md:block" />

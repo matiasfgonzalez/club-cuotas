@@ -59,9 +59,14 @@ export async function POST(request: Request) {
       )
     }
 
-    // Verificar que el torneo existe
+    // Verificar que el torneo existe y obtener jugadores inscritos
     const torneo = await db.torneo.findUnique({
       where: { id: torneoId },
+      include: {
+        inscripciones: {
+          select: { jugadorId: true },
+        },
+      },
     })
 
     if (!torneo) {
@@ -82,6 +87,17 @@ export async function POST(request: Request) {
         fechaVencimiento: new Date(fechaVencimiento),
       },
     })
+
+    // Asignar la cuota a todos los jugadores inscritos en el torneo
+    if (torneo.inscripciones.length > 0) {
+      await db.cuotaJugador.createMany({
+        data: torneo.inscripciones.map((inscripcion) => ({
+          cuotaId: cuota.id,
+          jugadorId: inscripcion.jugadorId,
+          estadoPago: 'PENDIENTE',
+        })),
+      })
+    }
 
     return NextResponse.json(cuota, { status: 201 })
   } catch (error) {

@@ -20,7 +20,6 @@ model Usuario {
   id             String     @id // ID de Clerk
   email          String     @unique
   nombreCompleto String
-  telefono       String?
   rol            RolUsuario @default(JUGADOR)
   activo         Boolean    @default(true)
   creadoEn       DateTime   @default(now())
@@ -50,6 +49,10 @@ model Torneo {
 model Jugador {
   id              String    @id @default(cuid())
   usuarioId       String    @unique
+  telefono        String?
+  dni             String?   // Número de documento
+  cuit            String?   @unique // CUIT único para evitar duplicados
+  obraSocial      String?
   fechaNacimiento DateTime?
   posicion        String?
   numeroCamiseta  Int?

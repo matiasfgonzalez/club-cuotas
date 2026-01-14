@@ -16,6 +16,7 @@ import {
   Receipt,
   History,
   UserCircle,
+  Home,
 } from 'lucide-react'
 
 interface DashboardNavProps {
@@ -24,6 +25,8 @@ interface DashboardNavProps {
 
 // Enlaces para administradores
 const enlacesAdmin = [
+  { href: '/jugador', label: 'Mis Cuotas', icon: Home },
+  { href: '/jugador/perfil', label: 'Mi Perfil', icon: UserCircle },
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/torneos', label: 'Torneos', icon: Trophy },
   { href: '/admin/jugadores', label: 'Jugadores', icon: Users },
@@ -47,13 +50,13 @@ export function DashboardNav({ esAdmin }: DashboardNavProps) {
 
   return (
     <aside className="hidden md:flex md:flex-col md:w-64 md:fixed md:inset-y-0 bg-zinc-900 border-r border-zinc-800">
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-zinc-800">
+      {/* Logo - clickeable hacia /jugador */}
+      <Link href="/jugador" className="flex items-center gap-3 px-6 py-5 border-b border-zinc-800 hover:bg-zinc-800/50 transition-colors">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
           <Trophy className="w-6 h-6 text-white" />
         </div>
         <span className="text-lg font-bold text-white">Club Cuotas</span>
-      </div>
+      </Link>
 
       {/* Navegación */}
       <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">

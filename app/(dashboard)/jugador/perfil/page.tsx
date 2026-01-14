@@ -45,10 +45,13 @@ export default async function PaginaPerfil() {
           id: usuario.id,
           email: usuario.email,
           nombreCompleto: usuario.nombreCompleto,
-          telefono: usuario.telefono || '',
         }}
         jugador={usuario.jugador ? {
           id: usuario.jugador.id,
+          telefono: usuario.jugador.telefono || '',
+          dni: usuario.jugador.dni || '',
+          cuit: usuario.jugador.cuit || '',
+          obraSocial: usuario.jugador.obraSocial || '',
           fechaNacimiento: usuario.jugador.fechaNacimiento?.toISOString().split('T')[0] || '',
           posicion: usuario.jugador.posicion || '',
           numeroCamiseta: usuario.jugador.numeroCamiseta || undefined,

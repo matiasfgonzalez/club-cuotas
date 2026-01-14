@@ -91,10 +91,10 @@ export default async function PaginaTorneos() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {torneos.map((torneo) => (
-            <Card
-              key={torneo.id}
-              className="bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-colors"
-            >
+            <Link key={torneo.id} href={`/admin/torneos/${torneo.id}`}>
+              <Card
+                className="bg-zinc-900 border-zinc-800 hover:border-emerald-500/50 transition-colors cursor-pointer h-full"
+              >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
@@ -159,6 +159,7 @@ export default async function PaginaTorneos() {
                 </div>
               </CardContent>
             </Card>
+            </Link>
           ))}
         </div>
       )}
