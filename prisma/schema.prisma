@@ -1,0 +1,184 @@
+// Este archivo configura el cliente de Prisma para la aplicación
+// Utiliza un patrón singleton para evitar múltiples conexiones en desarrollo
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// =====================================
+// MODELOS DE DOMINIO - TODOS EN ESPAÑOL
+// =====================================
+
+/// Usuario del sistema, sincronizado con Clerk
+model Usuario {
+  id             String     @id // ID de Clerk
+  email          String     @unique
+  nombreCompleto String
+  telefono       String?
+  rol            RolUsuario @default(JUGADOR)
+  activo         Boolean    @default(true)
+  creadoEn       DateTime   @default(now())
+  actualizadoEn  DateTime   @updatedAt
+
+  // Relaciones
+  jugador        Jugador?
+  pagosAprobados Pago[]     @relation("AprobadorPago")
+}
+
+/// Torneo o competencia en la que participan los jugadores
+model Torneo {
+  id          String    @id @default(cuid())
+  nombre      String
+  descripcion String?
+  fechaInicio DateTime
+  fechaFin    DateTime?
+  activo      Boolean   @default(true)
+  creadoEn    DateTime  @default(now())
+
+  // Relaciones
+  cuotas        Cuota[]
+  inscripciones InscripcionTorneo[]
+}
+
+/// Jugador del equipo, vinculado a un usuario
+model Jugador {
+  id              String    @id @default(cuid())
+  usuarioId       String    @unique
+  fechaNacimiento DateTime?
+  posicion        String?
+  numeroCamiseta  Int?
+  creadoEn        DateTime  @default(now())
+
+  // Relaciones
+  usuario       Usuario             @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  inscripciones InscripcionTorneo[]
+  pagos         Pago[]
+  cuotasAsignadas CuotaJugador[]
+}
+
+/// Inscripción de un jugador a un torneo
+model InscripcionTorneo {
+  id               String   @id @default(cuid())
+  jugadorId        String
+  torneoId         String
+  fechaInscripcion DateTime @default(now())
+  activo           Boolean  @default(true)
+
+  // Relaciones
+  jugador Jugador @relation(fields: [jugadorId], references: [id], onDelete: Cascade)
+  torneo  Torneo  @relation(fields: [torneoId], references: [id], onDelete: Cascade)
+
+  @@unique([jugadorId, torneoId])
+}
+
+/// Cuota definida para un torneo
+model Cuota {
+  id               String    @id @default(cuid())
+  torneoId         String
+  tipo             TipoCuota
+  nombre           String    // Ej: "Cuota Mensual Enero 2024"
+  descripcion      String?
+  monto            Decimal   @db.Decimal(10, 2)
+  fechaVencimiento DateTime
+  creadoEn         DateTime  @default(now())
+
+  // Relaciones
+  torneo       Torneo         @relation(fields: [torneoId], references: [id], onDelete: Cascade)
+  asignaciones CuotaJugador[]
+}
+
+/// Asignación de una cuota a un jugador específico
+model CuotaJugador {
+  id                 String     @id @default(cuid())
+  cuotaId            String
+  jugadorId          String
+  montoPersonalizado Decimal?   @db.Decimal(10, 2) // Si es diferente al monto base
+  estadoPago         EstadoPago @default(PENDIENTE)
+  creadoEn           DateTime   @default(now())
+
+  // Relaciones
+  cuota   Cuota   @relation(fields: [cuotaId], references: [id], onDelete: Cascade)
+  jugador Jugador @relation(fields: [jugadorId], references: [id], onDelete: Cascade)
+  pagos   Pago[]
+
+  @@unique([cuotaId, jugadorId])
+}
+
+/// Registro de un pago realizado por un jugador
+model Pago {
+  id              String           @id @default(cuid())
+  cuotaJugadorId  String
+  jugadorId       String
+  monto           Decimal          @db.Decimal(10, 2)
+  fechaPago       DateTime         @default(now())
+  metodo          MetodoPago
+  comprobante     String?          // URL del comprobante subido
+  estado          EstadoAprobacion @default(PENDIENTE)
+  notas           String?
+  aprobadoPorId   String?
+  fechaAprobacion DateTime?
+
+  // Relaciones
+  cuotaJugador CuotaJugador @relation(fields: [cuotaJugadorId], references: [id], onDelete: Cascade)
+  jugador      Jugador      @relation(fields: [jugadorId], references: [id], onDelete: Cascade)
+  aprobadoPor  Usuario?     @relation("AprobadorPago", fields: [aprobadoPorId], references: [id])
+}
+
+/// Configuración de cuentas bancarias del club
+model ConfiguracionBancaria {
+  id           String   @id @default(cuid())
+  banco        String
+  tipoCuenta   String
+  numeroCuenta String
+  titular      String
+  cbu          String?
+  alias        String?
+  activo       Boolean  @default(true)
+  creadoEn     DateTime @default(now())
+}
+
+// =====================================
+// ENUMS EN ESPAÑOL
+// =====================================
+
+/// Roles de usuario en el sistema
+enum RolUsuario {
+  ADMINISTRADOR
+  JUGADOR
+}
+
+/// Tipos de cuota disponibles
+enum TipoCuota {
+  UNICA        // Pago único (ej: equipamiento)
+  MENSUAL      // Cuota mensual recurrente
+  INSCRIPCION  // Pago de inscripción al torneo
+  EXTRAORDINARIA // Cuota especial o extra
+}
+
+/// Estado del pago de una cuota asignada
+enum EstadoPago {
+  PENDIENTE
+  PARCIAL
+  PAGADO
+}
+
+/// Estado de aprobación de un pago registrado
+enum EstadoAprobacion {
+  PENDIENTE
+  APROBADO
+  RECHAZADO
+}
+
+/// Métodos de pago disponibles
+enum MetodoPago {
+  EFECTIVO
+  TRANSFERENCIA
+  MERCADOPAGO
+  OTRO
+}
