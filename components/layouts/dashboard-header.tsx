@@ -5,7 +5,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { UserButton } from '@clerk/nextjs'
+import { UserMenu } from './user-menu'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -141,17 +141,7 @@ export function DashboardHeader({ usuario, esAdmin }: DashboardHeaderProps) {
             <p className="text-sm font-medium text-white">{usuario.nombreCompleto}</p>
             <p className="text-xs text-zinc-500">{usuario.email}</p>
           </div>
-          <UserButton
-            appearance={{
-              elements: {
-                avatarBox: 'w-10 h-10',
-                userButtonPopoverCard: 'bg-zinc-800 border-zinc-700',
-                userButtonPopoverActionButton: 'text-zinc-300 hover:bg-zinc-700',
-                userButtonPopoverActionButtonText: 'text-zinc-300',
-                userButtonPopoverFooter: 'hidden',
-              },
-            }}
-          />
+          <UserMenu />
         </div>
       </div>
     </header>
