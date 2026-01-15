@@ -64,7 +64,7 @@ export default async function PaginaAdminDashboard() {
       take: 5,
       orderBy: { fechaPago: 'desc' },
       include: {
-        jugador: { include: { usuario: true } },
+        jugador: true,
         cuotaJugador: { include: { cuota: true } },
       },
     }),
@@ -269,11 +269,14 @@ export default async function PaginaAdminDashboard() {
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-white font-medium">
-                        {pago.jugador.usuario.nombreCompleto.charAt(0)}
+                        {pago.jugador.nombre.charAt(0)}
                       </div>
                       <div>
                         <p className="text-sm font-medium text-white">
-                          {pago.jugador.usuario.nombreCompleto}
+                          {pago.jugador.nombre}
+                        </p>
+                        <p className="text-xs text-zinc-500">
+                          {pago.cuotaJugador.cuota.nombre}
                         </p>
                         <p className="text-xs text-zinc-500">
                           {pago.cuotaJugador.cuota.nombre}

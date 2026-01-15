@@ -56,7 +56,7 @@ export default async function PaginaDetalleTorneo({ params }: PageProps) {
         include: {
           jugador: {
             include: {
-              usuario: true,
+              usuarios: true,
               cuotasAsignadas: {
                 where: {
                   cuota: { torneoId: id },
@@ -86,10 +86,10 @@ export default async function PaginaDetalleTorneo({ params }: PageProps) {
   const jugadoresDisponibles = await db.jugador.findMany({
     where: {
       id: { notIn: jugadoresInscritos.length > 0 ? jugadoresInscritos : ['none'] },
-      usuario: { activo: true },
+      activo: true,
     },
-    include: { usuario: true },
-    orderBy: { usuario: { nombreCompleto: 'asc' } },
+    include: { usuarios: true },
+    orderBy: { nombre: 'asc' },
   })
 
   // Calcular estadísticas por jugador
@@ -113,6 +113,7 @@ export default async function PaginaDetalleTorneo({ params }: PageProps) {
     return {
       inscripcion,
       jugador: inscripcion.jugador,
+      usuarios: inscripcion.jugador.usuarios,
       totalCuotas,
       cuotasPagadas,
       cuotasPendientes,
@@ -181,8 +182,8 @@ export default async function PaginaDetalleTorneo({ params }: PageProps) {
           torneoNombre={torneo.nombre}
           jugadoresDisponibles={jugadoresDisponibles.map((j) => ({
             id: j.id,
-            nombre: j.usuario.nombreCompleto,
-            email: j.usuario.email,
+            nombre: j.nombre,
+            email: j.usuarios[0]?.email || 'Sin usuario',
           }))}
         />
       </div>
@@ -338,7 +339,7 @@ export default async function PaginaDetalleTorneo({ params }: PageProps) {
                   </tr>
                 </thead>
                 <tbody>
-                  {jugadoresConEstado.map(({ jugador, cuotasPagadas, cuotasPendientes, deudaTotal, estado }) => (
+                  {jugadoresConEstado.map(({ jugador, usuarios, cuotasPagadas, cuotasPendientes, deudaTotal, estado }) => (
                     <tr
                       key={jugador.id}
                       className="border-b border-zinc-800/50 hover:bg-zinc-800/30"
@@ -349,10 +350,10 @@ export default async function PaginaDetalleTorneo({ params }: PageProps) {
                           className="hover:underline"
                         >
                           <p className="font-medium text-white">
-                            {jugador.usuario.nombreCompleto}
+                            {jugador.nombre}
                           </p>
                           <p className="text-sm text-zinc-500">
-                            {jugador.usuario.email}
+                            {usuarios[0]?.email || 'Sin usuario asociado'}
                           </p>
                         </Link>
                       </td>

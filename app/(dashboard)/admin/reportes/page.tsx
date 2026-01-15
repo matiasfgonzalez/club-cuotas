@@ -7,9 +7,9 @@ import { db } from '@/lib/db'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from '@/components/ui/card'
 import {
   Users,
@@ -21,8 +21,7 @@ import {
   Clock,
   DollarSign,
 } from 'lucide-react'
-import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { startOfMonth, endOfMonth, subMonths } from 'date-fns'
 
 export default async function PaginaReportes() {
   const { userId } = await auth()
@@ -49,7 +48,7 @@ export default async function PaginaReportes() {
     cuotasAsignadas,
   ] = await Promise.all([
     db.jugador.count({
-      where: { usuario: { activo: true } },
+      where: { activo: true },
     }),
     db.torneo.count({ where: { activo: true } }),
     db.cuota.count(),
@@ -137,7 +136,6 @@ export default async function PaginaReportes() {
   // Jugadores con más deuda
   const jugadoresConDeuda = await db.jugador.findMany({
     include: {
-      usuario: true,
       cuotasAsignadas: {
         where: {
           estadoPago: { in: ['PENDIENTE', 'PARCIAL'] },
@@ -380,7 +378,7 @@ export default async function PaginaReportes() {
                       </span>
                       <div>
                         <p className="font-medium text-white">
-                          {jugador.usuario.nombreCompleto}
+                          {jugador.nombre}
                         </p>
                         <p className="text-xs text-zinc-500">
                           {jugador.cuotasAsignadas.length} cuotas pendientes

@@ -7,14 +7,11 @@ import { db } from '@/lib/db'
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Clock, CheckCircle2, XCircle, Receipt, ExternalLink } from 'lucide-react'
+import { Clock, CheckCircle2, XCircle, ExternalLink } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { BotonAprobacion } from '@/components/forms/boton-aprobacion'
@@ -38,7 +35,7 @@ export default async function PaginaPagos() {
     db.pago.findMany({
       where: { estado: 'PENDIENTE' },
       include: {
-        jugador: { include: { usuario: true } },
+        jugador: true,
         cuotaJugador: { include: { cuota: { include: { torneo: true } } } },
       },
       orderBy: { fechaPago: 'desc' },
@@ -47,7 +44,7 @@ export default async function PaginaPagos() {
       where: { estado: 'APROBADO' },
       take: 50,
       include: {
-        jugador: { include: { usuario: true } },
+        jugador: true,
         cuotaJugador: { include: { cuota: { include: { torneo: true } } } },
         aprobadoPor: true,
       },
@@ -57,7 +54,7 @@ export default async function PaginaPagos() {
       where: { estado: 'RECHAZADO' },
       take: 50,
       include: {
-        jugador: { include: { usuario: true } },
+        jugador: true,
         cuotaJugador: { include: { cuota: { include: { torneo: true } } } },
         aprobadoPor: true,
       },
@@ -168,12 +165,12 @@ export default async function PaginaPagos() {
                     <div className="flex items-start gap-4">
                       <Avatar className="h-12 w-12">
                         <AvatarFallback className="bg-gradient-to-br from-amber-400 to-orange-500 text-white text-lg">
-                          {pago.jugador.usuario.nombreCompleto.charAt(0)}
+                          {pago.jugador.nombre.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
                       <div className="space-y-1">
                         <h4 className="font-semibold text-white">
-                          {pago.jugador.usuario.nombreCompleto}
+                          {pago.jugador.nombre}
                         </h4>
                         <p className="text-sm text-zinc-400">
                           {pago.cuotaJugador.cuota.nombre} •{' '}
@@ -239,12 +236,12 @@ export default async function PaginaPagos() {
                     <div className="flex items-center gap-4">
                       <Avatar className="h-10 w-10">
                         <AvatarFallback className="bg-emerald-500/20 text-emerald-400">
-                          {pago.jugador.usuario.nombreCompleto.charAt(0)}
+                          {pago.jugador.nombre.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-medium text-white">
-                          {pago.jugador.usuario.nombreCompleto}
+                          {pago.jugador.nombre}
                         </p>
                         <p className="text-sm text-zinc-500">
                           {pago.cuotaJugador.cuota.nombre}
@@ -281,12 +278,12 @@ export default async function PaginaPagos() {
                     <div className="flex items-center gap-4">
                       <Avatar className="h-10 w-10">
                         <AvatarFallback className="bg-red-500/20 text-red-400">
-                          {pago.jugador.usuario.nombreCompleto.charAt(0)}
+                          {pago.jugador.nombre.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-medium text-white">
-                          {pago.jugador.usuario.nombreCompleto}
+                          {pago.jugador.nombre}
                         </p>
                         <p className="text-sm text-zinc-500">
                           {pago.cuotaJugador.cuota.nombre}
