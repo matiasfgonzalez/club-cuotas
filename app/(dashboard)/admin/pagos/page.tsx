@@ -15,6 +15,7 @@ import { Clock, CheckCircle2, XCircle, ExternalLink } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { BotonAprobacion } from '@/components/forms/boton-aprobacion'
+import { RegistrarPagoDialog } from './registrar-pago-dialog'
 
 export default async function PaginaPagos() {
   const { userId } = await auth()
@@ -31,7 +32,7 @@ export default async function PaginaPagos() {
     redirect('/jugador')
   }
 
-  const [pagosPendientes, pagosAprobados, pagosRechazados] = await Promise.all([
+  const [pagosPendientes, pagosAprobados, pagosRechazados, torneosActivos] = await Promise.all([
     db.pago.findMany({
       where: { estado: 'PENDIENTE' },
       include: {
@@ -60,16 +61,25 @@ export default async function PaginaPagos() {
       },
       orderBy: { fechaAprobacion: 'desc' },
     }),
+    // Obtener torneos activos para el diálogo de pago manual
+    db.torneo.findMany({
+      where: { activo: true },
+      select: { id: true, nombre: true },
+      orderBy: { nombre: 'asc' },
+    }),
   ])
 
   return (
     <div className="space-y-8">
-      {/* Título */}
-      <div>
-        <h1 className="text-3xl font-bold text-white">Gestión de Pagos</h1>
-        <p className="text-zinc-400 mt-1">
-          Revisa y aprueba los pagos registrados por los jugadores
-        </p>
+      {/* Título y acciones */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-white">Gestión de Pagos</h1>
+          <p className="text-zinc-400 mt-1">
+            Revisa y aprueba los pagos registrados por los jugadores
+          </p>
+        </div>
+        <RegistrarPagoDialog torneos={torneosActivos} />
       </div>
 
       {/* Resumen */}
