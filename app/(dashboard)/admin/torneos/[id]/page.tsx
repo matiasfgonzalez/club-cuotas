@@ -280,7 +280,7 @@ export default async function PaginaDetalleTorneo({ params }: PageProps) {
                 >
                   <div className="flex items-center justify-between mb-2">
                     <p className="font-medium text-white">{cuota.nombre}</p>
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs font-semibold bg-zinc-700/50 text-white border-zinc-600 px-3 py-1 uppercase tracking-wider">
                       {cuota.tipo}
                     </Badge>
                   </div>

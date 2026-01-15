@@ -214,30 +214,36 @@ export default async function PaginaAdminDashboard() {
             <CardDescription>Tareas frecuentes del sistema</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3">
-            <Button asChild variant="outline" className="justify-start h-auto py-4 border-zinc-700 hover:bg-zinc-800">
+            <Button asChild variant="ghost" className="justify-start h-auto py-4 px-4 bg-zinc-800/50 border border-zinc-700/50 hover:bg-zinc-800 hover:border-zinc-600 transition-all rounded-xl group">
               <Link href="/admin/torneos/nuevo">
-                <Trophy className="mr-3 h-5 w-5 text-emerald-400" />
+                <div className="p-2 rounded-lg bg-emerald-500/10 mr-4 group-hover:bg-emerald-500/20 transition-colors">
+                  <Trophy className="h-5 w-5 text-emerald-400" />
+                </div>
                 <div className="text-left">
                   <div className="font-medium text-white">Crear torneo</div>
-                  <div className="text-xs text-zinc-500">Nueva competencia</div>
+                  <div className="text-xs text-zinc-400">Nueva competencia</div>
                 </div>
               </Link>
             </Button>
-            <Button asChild variant="outline" className="justify-start h-auto py-4 border-zinc-700 hover:bg-zinc-800">
+            <Button asChild variant="ghost" className="justify-start h-auto py-4 px-4 bg-zinc-800/50 border border-zinc-700/50 hover:bg-zinc-800 hover:border-zinc-600 transition-all rounded-xl group">
               <Link href="/admin/jugadores/nuevo">
-                <Users className="mr-3 h-5 w-5 text-teal-400" />
+                <div className="p-2 rounded-lg bg-teal-500/10 mr-4 group-hover:bg-teal-500/20 transition-colors">
+                  <Users className="h-5 w-5 text-teal-400" />
+                </div>
                 <div className="text-left">
                   <div className="font-medium text-white">Agregar jugador</div>
-                  <div className="text-xs text-zinc-500">Nuevo integrante</div>
+                  <div className="text-xs text-zinc-400">Nuevo integrante</div>
                 </div>
               </Link>
             </Button>
-            <Button asChild variant="outline" className="justify-start h-auto py-4 border-zinc-700 hover:bg-zinc-800">
+            <Button asChild variant="ghost" className="justify-start h-auto py-4 px-4 bg-zinc-800/50 border border-zinc-700/50 hover:bg-zinc-800 hover:border-zinc-600 transition-all rounded-xl group">
               <Link href="/admin/cuotas/nueva">
-                <CreditCard className="mr-3 h-5 w-5 text-cyan-400" />
+                <div className="p-2 rounded-lg bg-cyan-500/10 mr-4 group-hover:bg-cyan-500/20 transition-colors">
+                  <CreditCard className="h-5 w-5 text-cyan-400" />
+                </div>
                 <div className="text-left">
                   <div className="font-medium text-white">Crear cuota</div>
-                  <div className="text-xs text-zinc-500">Nueva cuota para jugadores</div>
+                  <div className="text-xs text-zinc-400">Nueva cuota para jugadores</div>
                 </div>
               </Link>
             </Button>
