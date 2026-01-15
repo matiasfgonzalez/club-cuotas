@@ -54,8 +54,19 @@ export default async function PaginaJugadores() {
       },
       cuotasAsignadas: {
         where: { estadoPago: { in: ['PENDIENTE', 'PARCIAL'] } },
+        include: {
+          cuota: {
+            include: {
+              torneo: true,
+            },
+          },
+        },
       },
     },
+  })
+
+  const configuracionBancaria = await db.configuracionBancaria.findFirst({
+    where: { activo: true },
   })
 
   return (
@@ -187,13 +198,46 @@ export default async function PaginaJugadores() {
                   </TableCell>
                   <TableCell>
                     {jugador.cuotasAsignadas.length > 0 ? (
-                      <Badge
-                        variant="outline"
-                        className="border-amber-500/30 text-amber-400"
-                      >
-                        {jugador.cuotasAsignadas.length} pendiente
-                        {jugador.cuotasAsignadas.length > 1 ? 's' : ''}
-                      </Badge>
+                      <div className="flex flex-col gap-2">
+                        <Badge
+                          variant="outline"
+                          className="border-amber-500/30 text-amber-400 w-fit"
+                        >
+                          {jugador.cuotasAsignadas.length} pendiente
+                          {jugador.cuotasAsignadas.length > 1 ? 's' : ''}
+                        </Badge>
+                        {jugador.telefono && (
+                          <Button
+                            asChild
+                            variant="outline"
+                            size="sm"
+                            className="bg-green-500/10 text-green-400 border-green-500/20 hover:bg-green-500/20 h-8 text-xs w-fit"
+                          >
+                            <a
+                              href={`https://wa.me/${jugador.telefono.replace(
+                                /\D/g,
+                                ''
+                              )}?text=${encodeURIComponent(
+                                `Hola ${jugador.nombre}, te recordamos que tienes las siguientes cuotas pendientes:\n\n${jugador.cuotasAsignadas
+                                  .map(
+                                    (c) =>
+                                      `• ${c.cuota.nombre} - $${c.cuota.monto} (${c.cuota.torneo?.nombre || 'Torneo'})`
+                                  )
+                                  .join('\n')}\n\n${
+                                  configuracionBancaria
+                                    ? `Datos para transferir:\nBanco: ${configuracionBancaria.banco}\nAlias: ${configuracionBancaria.alias}\nCBU: ${configuracionBancaria.cbu}\nTitular: ${configuracionBancaria.titular}`
+                                    : ''
+                                }\n\nPor favor, envíanos el comprobante cuando realices el pago.`
+                              )}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <Phone className="mr-2 h-3 w-3" />
+                              Reclamar
+                            </a>
+                          </Button>
+                        )}
+                      </div>
                     ) : (
                       <Badge
                         variant="outline"
