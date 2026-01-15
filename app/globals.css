@@ -123,3 +123,14 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Force NProgress z-index and styles just in case */
+#nprogress .bar {
+  background: #10b981 !important;
+  height: 4px !important;
+  z-index: 99999 !important;
+}
+
+#nprogress .peg {
+  box-shadow: 0 0 10px #10b981, 0 0 5px #10b981 !important;
+}

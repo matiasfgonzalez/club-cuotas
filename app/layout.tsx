@@ -6,6 +6,7 @@ import { Outfit } from 'next/font/google'
 import { ClerkProvider } from '@clerk/nextjs'
 import { esES } from '@clerk/localizations'
 import { Toaster } from '@/components/ui/sonner'
+import { ProgressBarProvider } from '@/components/providers/progress-bar-provider'
 import './globals.css'
 
 const outfit = Outfit({
@@ -33,7 +34,9 @@ export default function RootLayout({
     <ClerkProvider localization={esES}>
       <html lang="es" suppressHydrationWarning>
         <body className={`${outfit.variable} font-sans antialiased`}>
-          {children}
+          <ProgressBarProvider>
+            {children}
+          </ProgressBarProvider>
           <Toaster position="top-right" richColors />
         </body>
       </html>
