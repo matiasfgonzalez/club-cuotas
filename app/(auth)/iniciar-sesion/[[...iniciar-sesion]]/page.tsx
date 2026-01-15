@@ -2,6 +2,7 @@
 // Utiliza el componente SignIn de Clerk con estilos personalizados
 
 import { SignIn } from '@clerk/nextjs'
+import { dark } from '@clerk/themes'
 
 export default function PaginaIniciarSesion() {
   return (
@@ -13,21 +14,26 @@ export default function PaginaIniciarSesion() {
         </div>
         <SignIn
           appearance={{
+            baseTheme: dark,
+            variables: {
+                colorPrimary: '#10b981', // emerald-500
+                colorBackground: '#18181b', // zinc-900
+                colorInputBackground: '#27272a', // zinc-800
+                colorText: 'white',
+                colorInputText: 'white',
+            },
             elements: {
               rootBox: 'w-full',
-              card: 'bg-zinc-800/80 border-zinc-700 shadow-2xl',
-              headerTitle: 'text-white',
-              headerSubtitle: 'text-zinc-400',
-              socialButtonsBlockButton:
-                'bg-zinc-700 border-zinc-600 text-white hover:bg-zinc-600',
-              socialButtonsBlockButtonText: 'text-white',
-              dividerLine: 'bg-zinc-600',
+              card: 'bg-zinc-900 border border-zinc-800 shadow-xl w-full',
+              headerTitle: 'hidden',
+              headerSubtitle: 'hidden',
+              socialButtonsBlockButton: 'bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-white',
+              socialButtonsBlockButtonText: 'text-white font-medium',
+              dividerLine: 'bg-zinc-700',
               dividerText: 'text-zinc-400',
               formFieldLabel: 'text-zinc-300',
-              formFieldInput:
-                'bg-zinc-700 border-zinc-600 text-white placeholder:text-zinc-500',
-              formButtonPrimary:
-                'bg-emerald-500 hover:bg-emerald-600 text-white',
+              formFieldInput: 'bg-zinc-800 border-zinc-700 text-white focus:border-emerald-500 transition-colors',
+              footerActionText: 'text-zinc-400',
               footerActionLink: 'text-emerald-400 hover:text-emerald-300',
               identityPreviewText: 'text-white',
               identityPreviewEditButton: 'text-emerald-400',
