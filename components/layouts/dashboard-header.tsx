@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { UserMenu } from './user-menu'
 import { cn } from '@/lib/utils'
+import { useSidebar } from '@/components/providers/sidebar-provider'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -64,9 +65,15 @@ export function DashboardHeader({ usuario, esAdmin }: DashboardHeaderProps) {
   const pathname = usePathname()
   const enlaces = esAdmin ? enlacesAdmin : enlacesJugador
   const [open, setOpen] = useState(false)
+  const { isCollapsed } = useSidebar()
 
   return (
-    <header className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-900/95 backdrop-blur supports-[backdrop-filter]:bg-zinc-900/80 md:ml-64">
+    <header
+      className={cn(
+        'sticky top-0 z-50 border-b border-zinc-800 bg-zinc-900/95 backdrop-blur supports-[backdrop-filter]:bg-zinc-900/80 transition-all duration-300',
+        isCollapsed ? 'md:ml-[70px]' : 'md:ml-64',
+      )}
+    >
       <div className="flex h-16 items-center justify-between px-4">
         {/* Botón menú móvil */}
         <div className="flex items-center gap-4 md:hidden">
@@ -77,20 +84,28 @@ export function DashboardHeader({ usuario, esAdmin }: DashboardHeaderProps) {
                 <span className="sr-only">Abrir menú</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-72 bg-zinc-900 border-zinc-800 p-0">
+            <SheetContent
+              side="left"
+              className="w-72 bg-zinc-900 border-zinc-800 p-0"
+            >
               <SheetHeader className="px-6 py-5 border-b border-zinc-800">
                 <SheetTitle className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
                     <Trophy className="w-6 h-6 text-white" />
                   </div>
-                  <span className="text-lg font-bold text-white">Club Cuotas</span>
+                  <span className="text-lg font-bold text-white">
+                    Club Cuotas
+                  </span>
                 </SheetTitle>
               </SheetHeader>
               <nav className="flex flex-col gap-1 px-4 py-6">
                 {enlaces.map((enlace) => {
                   const Icon = enlace.icon
-                  const isActive = pathname === enlace.href || 
-                    (enlace.href !== '/admin' && enlace.href !== '/jugador' && pathname.startsWith(enlace.href))
+                  const isActive =
+                    pathname === enlace.href ||
+                    (enlace.href !== '/admin' &&
+                      enlace.href !== '/jugador' &&
+                      pathname.startsWith(enlace.href))
 
                   return (
                     <Link
@@ -101,7 +116,7 @@ export function DashboardHeader({ usuario, esAdmin }: DashboardHeaderProps) {
                         'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all',
                         isActive
                           ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                          : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+                          : 'text-zinc-400 hover:text-white hover:bg-zinc-800',
                       )}
                     >
                       <Icon className="w-5 h-5" />
@@ -111,12 +126,14 @@ export function DashboardHeader({ usuario, esAdmin }: DashboardHeaderProps) {
                 })}
               </nav>
               <div className="px-4 py-4 border-t border-zinc-800 mt-auto">
-                <div className={cn(
-                  'px-4 py-2 rounded-xl text-xs font-medium text-center',
-                  esAdmin 
-                    ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                    : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                )}>
+                <div
+                  className={cn(
+                    'px-4 py-2 rounded-xl text-xs font-medium text-center',
+                    esAdmin
+                      ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                      : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+                  )}
+                >
                   {esAdmin ? 'Administrador' : 'Jugador'}
                 </div>
               </div>
@@ -138,7 +155,9 @@ export function DashboardHeader({ usuario, esAdmin }: DashboardHeaderProps) {
         {/* Usuario y acciones */}
         <div className="flex items-center gap-4">
           <div className="hidden sm:block text-right">
-            <p className="text-sm font-medium text-white">{usuario.nombreCompleto}</p>
+            <p className="text-sm font-medium text-white">
+              {usuario.nombreCompleto}
+            </p>
             <p className="text-xs text-zinc-500">{usuario.email}</p>
           </div>
           <UserMenu />

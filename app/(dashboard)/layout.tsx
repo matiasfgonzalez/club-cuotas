@@ -6,6 +6,10 @@ import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
 import { DashboardNav } from '@/components/layouts/dashboard-nav'
 import { DashboardHeader } from '@/components/layouts/dashboard-header'
+import {
+  DashboardClientWrapper,
+  DashboardMainContent,
+} from '@/components/layouts/dashboard-client-wrapper'
 
 // Forzar renderizado dinámico para evitar errores de build
 export const dynamic = 'force-dynamic'
@@ -49,26 +53,26 @@ export default async function DashboardLayout({
   const esAdmin = usuario?.rol === 'ADMINISTRADOR'
 
   return (
-    <div className="min-h-screen bg-zinc-950">
-      {/* Header móvil */}
-      <DashboardHeader
-        usuario={{
-          nombreCompleto: usuario?.nombreCompleto || 'Usuario',
-          email: usuario?.email || '',
-          rol: usuario?.rol || 'JUGADOR',
-        }}
-        esAdmin={esAdmin}
-      />
+    <DashboardClientWrapper>
+      <div className="min-h-screen bg-zinc-950">
+        {/* Header móvil */}
+        <DashboardHeader
+          usuario={{
+            nombreCompleto: usuario?.nombreCompleto || 'Usuario',
+            email: usuario?.email || '',
+            rol: usuario?.rol || 'JUGADOR',
+          }}
+          esAdmin={esAdmin}
+        />
 
-      <div className="flex">
-        {/* Navegación lateral (desktop) */}
-        <DashboardNav esAdmin={esAdmin} />
+        <div className="flex">
+          {/* Navegación lateral (desktop) */}
+          <DashboardNav esAdmin={esAdmin} />
 
-        {/* Contenido principal */}
-        <main className="flex-1 min-w-0 overflow-x-hidden p-4 md:p-6 lg:p-8 md:ml-64">
-          <div className="max-w-7xl mx-auto">{children}</div>
-        </main>
+          {/* Contenido principal */}
+          <DashboardMainContent>{children}</DashboardMainContent>
+        </div>
       </div>
-    </div>
+    </DashboardClientWrapper>
   )
 }
