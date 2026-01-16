@@ -10,6 +10,7 @@ import {
   DashboardClientWrapper,
   DashboardMainContent,
 } from '@/components/layouts/dashboard-client-wrapper'
+import { notificarNuevoUsuario } from '@/lib/telegram'
 
 // Forzar renderizado dinámico para evitar errores de build
 export const dynamic = 'force-dynamic'
@@ -35,19 +36,25 @@ export default async function DashboardLayout({
 
   // Si no existe, crearlo automáticamente (sin jugador asociado)
   if (!usuario && user) {
+    const nombreCompleto =
+      `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Usuario'
+    const email = user.emailAddresses[0]?.emailAddress || ''
+
     usuario = await db.usuario.upsert({
       where: { id: userId },
       update: {},
       create: {
         id: userId,
-        email: user.emailAddresses[0]?.emailAddress || '',
-        nombreCompleto:
-          `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Usuario',
+        email,
+        nombreCompleto,
         rol: 'JUGADOR',
         // No se crea jugador automáticamente - debe asociarse después
       },
       include: { jugador: true },
     })
+
+    // Notificar nuevo usuario por Telegram (no bloquea el flujo)
+    notificarNuevoUsuario({ nombreCompleto, email }).catch(console.error)
   }
 
   const esAdmin = usuario?.rol === 'ADMINISTRADOR'

@@ -11,9 +11,11 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Settings, CreditCard, Plus } from 'lucide-react'
+import { Settings, CreditCard, Plus, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { BotonPruebaTelegram } from '@/components/admin/boton-prueba-telegram'
+import { telegramConfigurado } from '@/lib/telegram'
 
 export default async function PaginaConfiguracion() {
   const { userId } = await auth()
@@ -33,6 +35,8 @@ export default async function PaginaConfiguracion() {
   const configuracionesBancarias = await db.configuracionBancaria.findMany({
     orderBy: { creadoEn: 'desc' },
   })
+
+  const telegramActivo = telegramConfigurado()
 
   return (
     <div className="space-y-8">
@@ -56,7 +60,10 @@ export default async function PaginaConfiguracion() {
               Cuentas bancarias para recibir pagos de los jugadores
             </CardDescription>
           </div>
-          <Button asChild className="bg-emerald-500 hover:bg-emerald-600 text-white">
+          <Button
+            asChild
+            className="bg-emerald-500 hover:bg-emerald-600 text-white"
+          >
             <Link href="/admin/configuracion/banco/nuevo">
               <Plus className="mr-2 h-4 w-4" />
               Agregar cuenta
@@ -74,7 +81,10 @@ export default async function PaginaConfiguracion() {
                 Agrega una cuenta bancaria para que los jugadores puedan hacer
                 transferencias
               </p>
-              <Button asChild className="bg-emerald-500 hover:bg-emerald-600 text-white">
+              <Button
+                asChild
+                className="bg-emerald-500 hover:bg-emerald-600 text-white"
+              >
                 <Link href="/admin/configuracion/banco/nuevo">
                   <Plus className="mr-2 h-4 w-4" />
                   Agregar primera cuenta
@@ -137,12 +147,54 @@ export default async function PaginaConfiguracion() {
       <Card className="bg-zinc-900 border-zinc-800">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
+            <MessageCircle className="h-5 w-5 text-blue-400" />
+            Notificaciones de Telegram
+          </CardTitle>
+          <CardDescription>
+            Configuración del bot de Telegram para recibir avisos
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between p-4 rounded-xl border border-zinc-800 bg-zinc-800/30">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <h4 className="font-medium text-white">Estado del Bot</h4>
+                <Badge
+                  variant="outline"
+                  className={
+                    telegramActivo
+                      ? 'border-emerald-500/30 text-emerald-400'
+                      : 'border-amber-500/30 text-amber-400'
+                  }
+                >
+                  {telegramActivo ? 'Configurado' : 'No configurado'}
+                </Badge>
+              </div>
+              <p className="text-sm text-zinc-400">
+                {telegramActivo
+                  ? 'El bot está listo para enviar notificaciones'
+                  : 'Configura TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID en las variables de entorno'}
+              </p>
+            </div>
+            {telegramActivo && <BotonPruebaTelegram />}
+          </div>
+          {telegramActivo && (
+            <p className="text-xs text-zinc-500">
+              Al presionar el botón se enviará un listado de todos los torneos
+              del sistema al chat de Telegram configurado.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Configuración General */}
+      <Card className="bg-zinc-900 border-zinc-800">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
             <Settings className="h-5 w-5 text-zinc-400" />
             Configuración General
           </CardTitle>
-          <CardDescription>
-            Ajustes generales del sistema
-          </CardDescription>
+          <CardDescription>Ajustes generales del sistema</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-zinc-500 text-sm">

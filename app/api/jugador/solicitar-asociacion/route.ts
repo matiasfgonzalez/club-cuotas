@@ -1,60 +1,58 @@
 // API para solicitar asociación de jugador a usuario
 
-import { auth } from '@clerk/nextjs/server'
-import { NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { auth } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+import { db } from "@/lib/db";
+import { notificarAsociacionJugador } from "@/lib/telegram";
 
 export async function POST(request: Request) {
   try {
-    const { userId } = await auth()
+    const { userId } = await auth();
 
     if (!userId) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
-    const body = await request.json()
-    const { jugadorId } = body
+    const body = await request.json();
+    const { jugadorId } = body;
 
     if (!jugadorId) {
       return NextResponse.json(
-        { error: 'ID de jugador requerido' },
+        { error: "ID de jugador requerido" },
         { status: 400 }
-      )
+      );
     }
 
     // Verificar que el usuario existe y no tiene jugador asociado
     const usuario = await db.usuario.findUnique({
       where: { id: userId },
       include: { jugador: true },
-    })
+    });
 
     if (!usuario) {
       return NextResponse.json(
-        { error: 'Usuario no encontrado' },
+        { error: "Usuario no encontrado" },
         { status: 404 }
-      )
+      );
     }
 
     if (usuario.jugador) {
       return NextResponse.json(
-        { error: 'Ya tienes un jugador asociado' },
+        { error: "Ya tienes un jugador asociado" },
         { status: 400 }
-      )
+      );
     }
 
     // Verificar que el jugador existe
     const jugador = await db.jugador.findUnique({
       where: { id: jugadorId },
-    })
+    });
 
     if (!jugador) {
       return NextResponse.json(
-        { error: 'Jugador no encontrado' },
+        { error: "Jugador no encontrado" },
         { status: 404 }
-      )
+      );
     }
 
     // Asociar usuario con jugador
@@ -63,14 +61,22 @@ export async function POST(request: Request) {
       data: {
         jugadorId: jugadorId,
       },
-    })
+    });
 
-    return NextResponse.json({ success: true })
+    // Notificar asociación por Telegram (no bloquea el flujo)
+    notificarAsociacionJugador({
+      nombreUsuario: usuario.nombreCompleto,
+      emailUsuario: usuario.email,
+      nombreJugador: jugador.nombre,
+      cuitJugador: jugador.cuit,
+    }).catch(console.error);
+
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error al asociar jugador:', error)
+    console.error("Error al asociar jugador:", error);
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      { error: "Error interno del servidor" },
       { status: 500 }
-    )
+    );
   }
 }

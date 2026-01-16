@@ -11,6 +11,7 @@ import {
   type AprobacionPagoFormData,
 } from "@/lib/validations";
 import type { ResultadoAccion, Pago } from "@/types";
+import { notificarPagoPendiente } from "@/lib/telegram";
 
 // Registrar un nuevo pago (jugador)
 export async function registrarPago(
@@ -44,7 +45,7 @@ export async function registrarPago(
     // Verificar que la cuota pertenece al jugador
     const cuotaJugador = await db.cuotaJugador.findUnique({
       where: { id: validacion.data.cuotaJugadorId },
-      include: { cuota: true },
+      include: { cuota: { include: { torneo: true } } },
     });
 
     if (!cuotaJugador) {
@@ -95,6 +96,16 @@ export async function registrarPago(
         estado: "PENDIENTE",
       },
     });
+
+    // Notificar pago pendiente por Telegram (no bloquea el flujo)
+    notificarPagoPendiente({
+      nombreJugador: usuario.jugador.nombre,
+      monto: validacion.data.monto,
+      metodo: validacion.data.metodo,
+      nombreCuota: cuotaJugador.cuota.nombre,
+      nombreTorneo: cuotaJugador.cuota.torneo.nombre,
+      comprobante: validacion.data.comprobante,
+    }).catch(console.error);
 
     revalidatePath("/jugador");
     revalidatePath("/jugador/pagos");
