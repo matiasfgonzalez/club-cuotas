@@ -1,88 +1,90 @@
-'use client'
+"use client";
 
 // Formulario de creación de jugador (independiente de usuario)
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { toast } from 'sonner'
-import { User, Loader2, ArrowLeft, Trophy, CreditCard } from 'lucide-react'
-import Link from 'next/link'
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import { User, Loader2, ArrowLeft, Trophy, CreditCard } from "lucide-react";
+import Link from "next/link";
 
 interface Torneo {
-  id: string
-  nombre: string
+  id: string;
+  nombre: string;
 }
 
 interface JugadorFormProps {
-  torneos: Torneo[]
+  torneos: Torneo[];
 }
 
 const POSICIONES = [
-  'Arquero',
-  'Defensor Central',
-  'Lateral Derecho',
-  'Lateral Izquierdo',
-  'Mediocampista Central',
-  'Mediocampista Ofensivo',
-  'Mediocampista Defensivo',
-  'Extremo Derecho',
-  'Extremo Izquierdo',
-  'Delantero Centro',
-  'Segundo Delantero',
-]
+  "Arquero",
+  "Defensor Central",
+  "Lateral Derecho",
+  "Lateral Izquierdo",
+  "Mediocampista Central",
+  "Mediocampista Ofensivo",
+  "Mediocampista Defensivo",
+  "Extremo Derecho",
+  "Extremo Izquierdo",
+  "Delantero Centro",
+  "Segundo Delantero",
+];
 
 export function JugadorForm({ torneos }: JugadorFormProps) {
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    nombre: '',
-    telefono: '',
-    dni: '',
-    cuit: '',
-    obraSocial: '',
-    fechaNacimiento: '',
-    posicion: '',
-    numeroCamiseta: '',
-  })
+    nombre: "",
+    telefono: "",
+    dni: "",
+    cuit: "",
+    obraSocial: "",
+    fechaNacimiento: "",
+    posicion: "",
+    numeroCamiseta: "",
+  });
 
-  const [torneosSeleccionados, setTorneosSeleccionados] = useState<string[]>([])
+  const [torneosSeleccionados, setTorneosSeleccionados] = useState<string[]>(
+    []
+  );
 
   const toggleTorneo = (torneoId: string) => {
     setTorneosSeleccionados((prev) =>
       prev.includes(torneoId)
         ? prev.filter((id) => id !== torneoId)
         : [...prev, torneoId]
-    )
-  }
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
-      const response = await fetch('/api/admin/jugadores', {
-        method: 'POST',
+      const response = await fetch("/api/admin/jugadores", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           nombre: formData.nombre,
@@ -97,24 +99,24 @@ export function JugadorForm({ torneos }: JugadorFormProps) {
             : null,
           torneoIds: torneosSeleccionados,
         }),
-      })
+      });
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Error al crear jugador')
+        const error = await response.json();
+        throw new Error(error.error || "Error al crear jugador");
       }
 
-      toast.success('Jugador creado correctamente')
-      router.push('/admin/jugadores')
-      router.refresh()
+      toast.success("Jugador creado correctamente");
+      router.push("/admin/jugadores");
+      router.refresh();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Error al crear el jugador'
-      )
+        error instanceof Error ? error.message : "Error al crear el jugador"
+      );
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -125,9 +127,7 @@ export function JugadorForm({ torneos }: JugadorFormProps) {
             <User className="h-5 w-5 text-emerald-400" />
             Datos del jugador
           </CardTitle>
-          <CardDescription>
-            Información básica del jugador
-          </CardDescription>
+          <CardDescription>Información básica del jugador</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -181,7 +181,10 @@ export function JugadorForm({ torneos }: JugadorFormProps) {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="cuit" className="text-zinc-300 flex items-center gap-1">
+              <Label
+                htmlFor="cuit"
+                className="text-zinc-300 flex items-center gap-1"
+              >
                 <CreditCard className="h-4 w-4" />
                 CUIT (único - para asociación)
               </Label>
@@ -245,7 +248,7 @@ export function JugadorForm({ torneos }: JugadorFormProps) {
                 Posición
               </Label>
               <Select
-                value={formData.posicion}
+                value={formData.posicion || undefined}
                 onValueChange={(value) =>
                   setFormData({ ...formData, posicion: value })
                 }
@@ -303,14 +306,15 @@ export function JugadorForm({ torneos }: JugadorFormProps) {
                   key={torneo.id}
                   className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
                     torneosSeleccionados.includes(torneo.id)
-                      ? 'bg-emerald-500/10 border border-emerald-500/30'
-                      : 'bg-zinc-800/50 border border-transparent hover:bg-zinc-800'
+                      ? "bg-emerald-500/10 border border-emerald-500/30"
+                      : "bg-zinc-800/50 border border-transparent hover:bg-zinc-800"
                   }`}
                   onClick={() => toggleTorneo(torneo.id)}
                 >
                   <Checkbox
                     checked={torneosSeleccionados.includes(torneo.id)}
                     onCheckedChange={() => toggleTorneo(torneo.id)}
+                    onClick={(e) => e.stopPropagation()}
                   />
                   <span className="text-white">{torneo.nombre}</span>
                 </div>
@@ -344,5 +348,5 @@ export function JugadorForm({ torneos }: JugadorFormProps) {
         </Button>
       </div>
     </form>
-  )
+  );
 }
