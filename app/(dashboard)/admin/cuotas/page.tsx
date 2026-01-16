@@ -58,13 +58,13 @@ export default async function PaginaCuotas() {
   const cuotasConEstadisticas = cuotas.map((cuota) => {
     const totalAsignaciones = cuota.asignaciones.length
     const pagadasCompleto = cuota.asignaciones.filter(
-      (a) => a.estadoPago === 'PAGADO'
+      (a) => a.estadoPago === 'PAGADO',
     ).length
     const parciales = cuota.asignaciones.filter(
-      (a) => a.estadoPago === 'PARCIAL'
+      (a) => a.estadoPago === 'PARCIAL',
     ).length
     const pendientes = cuota.asignaciones.filter(
-      (a) => a.estadoPago === 'PENDIENTE'
+      (a) => a.estadoPago === 'PENDIENTE',
     ).length
     const vencida = isPast(cuota.fechaVencimiento)
     const porVencer =
@@ -93,16 +93,19 @@ export default async function PaginaCuotas() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 overflow-hidden">
       {/* Título y acción */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
+        <div className="min-w-0">
           <h1 className="text-3xl font-bold text-white">Cuotas</h1>
           <p className="text-zinc-400 mt-1">
             Gestiona las cuotas y asignaciones a jugadores
           </p>
         </div>
-        <Button asChild className="bg-emerald-500 hover:bg-emerald-600 text-white">
+        <Button
+          asChild
+          className="bg-emerald-500 hover:bg-emerald-600 text-white w-full sm:w-auto shrink-0"
+        >
           <Link href="/admin/cuotas/nueva">
             <Plus className="mr-2 h-4 w-4" />
             Nueva Cuota
@@ -121,7 +124,10 @@ export default async function PaginaCuotas() {
             <p className="text-zinc-500 text-sm mb-4 text-center">
               Crea una cuota y asígnala a los jugadores
             </p>
-            <Button asChild className="bg-emerald-500 hover:bg-emerald-600 text-white">
+            <Button
+              asChild
+              className="bg-emerald-500 hover:bg-emerald-600 text-white"
+            >
               <Link href="/admin/cuotas/nueva">
                 <Plus className="mr-2 h-4 w-4" />
                 Crear cuota
@@ -130,16 +136,22 @@ export default async function PaginaCuotas() {
           </CardContent>
         </Card>
       ) : (
-        <Card className="bg-zinc-900 border-zinc-800 overflow-hidden">
+        <Card className="bg-zinc-900 border-zinc-800">
           <div className="overflow-x-auto">
-            <Table>
+            <Table className="min-w-[600px]">
               <TableHeader>
                 <TableRow className="border-zinc-800 hover:bg-transparent">
                   <TableHead className="text-zinc-400">Cuota</TableHead>
-                  <TableHead className="text-zinc-400">Torneo</TableHead>
+                  <TableHead className="text-zinc-400 hidden sm:table-cell">
+                    Torneo
+                  </TableHead>
                   <TableHead className="text-zinc-400">Monto</TableHead>
-                  <TableHead className="text-zinc-400">Vencimiento</TableHead>
-                  <TableHead className="text-zinc-400">Estado</TableHead>
+                  <TableHead className="text-zinc-400 hidden md:table-cell">
+                    Vencimiento
+                  </TableHead>
+                  <TableHead className="text-zinc-400 hidden lg:table-cell">
+                    Estado
+                  </TableHead>
                   <TableHead className="text-zinc-400 text-right">
                     Recaudación
                   </TableHead>
@@ -174,15 +186,17 @@ export default async function PaginaCuotas() {
                         </div>
                       </Link>
                     </TableCell>
-                    <TableCell>
-                      <span className="text-zinc-300">{cuota.torneo.nombre}</span>
+                    <TableCell className="hidden sm:table-cell">
+                      <span className="text-zinc-300">
+                        {cuota.torneo.nombre}
+                      </span>
                     </TableCell>
                     <TableCell>
                       <span className="font-medium text-white">
                         ${cuota.monto.toNumber().toLocaleString('es-AR')}
                       </span>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-zinc-500" />
                         <span
@@ -190,7 +204,7 @@ export default async function PaginaCuotas() {
                             cuota.vencida ? 'text-red-400' : 'text-zinc-300'
                           }
                         >
-                          {format(cuota.fechaVencimiento, "d MMM yyyy", {
+                          {format(cuota.fechaVencimiento, 'd MMM yyyy', {
                             locale: es,
                           })}
                         </span>
@@ -207,7 +221,7 @@ export default async function PaginaCuotas() {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden lg:table-cell">
                       <div className="flex items-center gap-2">
                         <Users className="h-4 w-4 text-zinc-500" />
                         <div className="flex gap-1">
@@ -241,8 +255,9 @@ export default async function PaginaCuotas() {
                       <p className="text-xs text-zinc-500">
                         {cuota.totalAsignaciones > 0
                           ? Math.round(
-                              (cuota.pagadasCompleto / cuota.totalAsignaciones) *
-                                100
+                              (cuota.pagadasCompleto /
+                                cuota.totalAsignaciones) *
+                                100,
                             )
                           : 0}
                         % completado

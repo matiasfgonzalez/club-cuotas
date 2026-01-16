@@ -59,11 +59,13 @@ export function RegistrarPagoDialog({ torneos }: RegistrarPagoDialogProps) {
   const [torneoId, setTorneoId] = useState('')
   const [cuotaId, setCuotaId] = useState('')
   const [jugadorId, setJugadorId] = useState('')
-  
+
   // Datos cargados dinámicamente
   const [cuotas, setCuotas] = useState<CuotaSimple[]>([])
   const [jugadores, setJugadores] = useState<JugadorDeudor[]>([])
-  const [selectedJugador, setSelectedJugador] = useState<JugadorDeudor | null>(null)
+  const [selectedJugador, setSelectedJugador] = useState<JugadorDeudor | null>(
+    null,
+  )
 
   // Datos del formulario
   const [monto, setMonto] = useState('')
@@ -81,7 +83,9 @@ export function RegistrarPagoDialog({ torneos }: RegistrarPagoDialogProps) {
     const fetchCuotas = async () => {
       setLoadingData(true)
       try {
-        const res = await fetch(`/api/admin/pagos/registrar?tipo=cuotas&id=${torneoId}`)
+        const res = await fetch(
+          `/api/admin/pagos/registrar?tipo=cuotas&id=${torneoId}`,
+        )
         if (!res.ok) throw new Error('Error al cargar cuotas')
         const data = await res.json()
         setCuotas(data)
@@ -109,7 +113,9 @@ export function RegistrarPagoDialog({ torneos }: RegistrarPagoDialogProps) {
     const fetchJugadores = async () => {
       setLoadingData(true)
       try {
-        const res = await fetch(`/api/admin/pagos/registrar?tipo=jugadores&id=${cuotaId}`)
+        const res = await fetch(
+          `/api/admin/pagos/registrar?tipo=jugadores&id=${cuotaId}`,
+        )
         if (!res.ok) throw new Error('Error al cargar jugadores')
         const data = await res.json()
         setJugadores(data)
@@ -132,12 +138,12 @@ export function RegistrarPagoDialog({ torneos }: RegistrarPagoDialogProps) {
       setSelectedJugador(null)
       return
     }
-    const jugador = jugadores.find(j => j.id === jugadorId) || null
+    const jugador = jugadores.find((j) => j.id === jugadorId) || null
     setSelectedJugador(jugador)
     if (jugador) {
-        setMonto(jugador.saldoPendiente.toString())
+      setMonto(jugador.saldoPendiente.toString())
     } else {
-        setMonto('')
+      setMonto('')
     }
   }, [jugadorId, jugadores])
 
@@ -168,14 +174,13 @@ export function RegistrarPagoDialog({ torneos }: RegistrarPagoDialogProps) {
       toast.success('Pago registrado y aprobado correctamente')
       router.refresh()
       setOpen(false)
-      
+
       // Resetear formulario
       setTorneoId('')
       setCuotaId('')
       setJugadorId('')
       setMonto('')
       setNotas('')
-      
     } catch (error) {
       console.error(error)
       toast.error(error instanceof Error ? error.message : 'Error desconocido')
@@ -187,22 +192,21 @@ export function RegistrarPagoDialog({ torneos }: RegistrarPagoDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-emerald-500 hover:bg-emerald-600 text-white gap-2">
+        <Button className="bg-emerald-500 hover:bg-emerald-600 text-white gap-2 w-full sm:w-auto">
           <CreditCard className="h-4 w-4" />
           Registrar Pago
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-zinc-900 border-zinc-800 text-white sm:max-w-[425px]">
+      <DialogContent className="bg-zinc-900 border-zinc-800 text-white max-w-[calc(100vw-2rem)] sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Registrar Pago Manual</DialogTitle>
           <DialogDescription className="text-zinc-400">
-            Registra un pago realizado fuera de la plataforma (Efectivo/Transferencia).
-            Se marcará como APROBADO automáticamente.
+            Registra un pago realizado fuera de la plataforma
+            (Efectivo/Transferencia). Se marcará como APROBADO automáticamente.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-          
           {/* Selector de Torneo */}
           <div className="space-y-2">
             <Label>Torneo</Label>
@@ -212,7 +216,9 @@ export function RegistrarPagoDialog({ torneos }: RegistrarPagoDialogProps) {
               </SelectTrigger>
               <SelectContent className="bg-zinc-800 border-zinc-700">
                 {torneos.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>{t.nombre}</SelectItem>
+                  <SelectItem key={t.id} value={t.id}>
+                    {t.nombre}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -221,14 +227,23 @@ export function RegistrarPagoDialog({ torneos }: RegistrarPagoDialogProps) {
           {/* Selector de Cuota */}
           <div className="space-y-2">
             <Label>Cuota</Label>
-            <Select value={cuotaId} onValueChange={setCuotaId} disabled={!torneoId || loadingData}>
+            <Select
+              value={cuotaId}
+              onValueChange={setCuotaId}
+              disabled={!torneoId || loadingData}
+            >
               <SelectTrigger className="bg-zinc-800 border-zinc-700">
-                <SelectValue placeholder={loadingData ? "Cargando..." : "Selecciona una cuota"} />
+                <SelectValue
+                  placeholder={
+                    loadingData ? 'Cargando...' : 'Selecciona una cuota'
+                  }
+                />
               </SelectTrigger>
               <SelectContent className="bg-zinc-800 border-zinc-700">
                 {cuotas.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
-                    {c.nombre} (${c.monto.toLocaleString('es-AR')})
+                    {c.nombre} ($
+                    {c.monto.toLocaleString('es-AR')})
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -238,20 +253,27 @@ export function RegistrarPagoDialog({ torneos }: RegistrarPagoDialogProps) {
           {/* Selector de Jugador */}
           <div className="space-y-2">
             <Label>Jugador (Solo pendientes)</Label>
-            <Select value={jugadorId} onValueChange={setJugadorId} disabled={!cuotaId || loadingData}>
+            <Select
+              value={jugadorId}
+              onValueChange={setJugadorId}
+              disabled={!cuotaId || loadingData}
+            >
               <SelectTrigger className="bg-zinc-800 border-zinc-700">
-                <SelectValue placeholder={
-                    loadingData 
-                    ? "Cargando..." 
-                    : jugadores.length === 0 
-                        ? "No hay jugadores con deuda"
-                        : "Selecciona un jugador"
-                } />
+                <SelectValue
+                  placeholder={
+                    loadingData
+                      ? 'Cargando...'
+                      : jugadores.length === 0
+                      ? 'No hay jugadores con deuda'
+                      : 'Selecciona un jugador'
+                  }
+                />
               </SelectTrigger>
               <SelectContent className="bg-zinc-800 border-zinc-700">
                 {jugadores.map((j) => (
                   <SelectItem key={j.id} value={j.id}>
-                    {j.nombre} (Debe: ${j.saldoPendiente.toLocaleString('es-AR')})
+                    {j.nombre} (Debe: $
+                    {j.saldoPendiente.toLocaleString('es-AR')})
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -263,8 +285,8 @@ export function RegistrarPagoDialog({ torneos }: RegistrarPagoDialogProps) {
               <div className="space-y-2">
                 <Label htmlFor="monto">Monto a pagar</Label>
                 <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-                    <Input
+                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                  <Input
                     id="monto"
                     type="number"
                     step="0.01"
@@ -274,10 +296,11 @@ export function RegistrarPagoDialog({ torneos }: RegistrarPagoDialogProps) {
                     value={monto}
                     onChange={(e) => setMonto(e.target.value)}
                     required
-                    />
+                  />
                 </div>
                 <p className="text-xs text-zinc-500">
-                    Saldo total: ${selectedJugador.saldoPendiente.toLocaleString('es-AR')}
+                  Saldo total: $
+                  {selectedJugador.saldoPendiente.toLocaleString('es-AR')}
                 </p>
               </div>
 
@@ -318,10 +341,10 @@ export function RegistrarPagoDialog({ torneos }: RegistrarPagoDialogProps) {
             >
               Cancelar
             </Button>
-            <Button 
-                type="submit" 
-                className="bg-emerald-500 hover:bg-emerald-600 text-white"
-                disabled={loading || !selectedJugador}
+            <Button
+              type="submit"
+              className="bg-emerald-500 hover:bg-emerald-600 text-white"
+              disabled={loading || !selectedJugador}
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Registrar Pago

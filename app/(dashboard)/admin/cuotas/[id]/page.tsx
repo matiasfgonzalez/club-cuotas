@@ -1,18 +1,18 @@
 // Página de detalle de cuota (admin)
 
-import { auth } from "@clerk/nextjs/server";
-import { redirect, notFound } from "next/navigation";
-import Link from "next/link";
-import { db } from "@/lib/db";
-import { Button } from "@/components/ui/button";
+import { auth } from '@clerk/nextjs/server'
+import { redirect, notFound } from 'next/navigation'
+import Link from 'next/link'
+import { db } from '@/lib/db'
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import {
   Table,
   TableBody,
@@ -20,7 +20,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table'
 import {
   ArrowLeft,
   CreditCard,
@@ -32,30 +32,30 @@ import {
   CheckCircle,
   Clock,
   CircleDollarSign,
-} from "lucide-react";
-import { format, isPast } from "date-fns";
-import { es } from "date-fns/locale";
-import { EliminarCuotaDialog } from "./eliminar-cuota-dialog";
-import { GestionarJugadoresDialog } from "./gestionar-jugadores-dialog";
+} from 'lucide-react'
+import { format, isPast } from 'date-fns'
+import { es } from 'date-fns/locale'
+import { EliminarCuotaDialog } from './eliminar-cuota-dialog'
+import { GestionarJugadoresDialog } from './gestionar-jugadores-dialog'
 
 interface PageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string }>
 }
 
 export default async function PaginaDetalleCuota({ params }: PageProps) {
-  const { id } = await params;
-  const { userId } = await auth();
+  const { id } = await params
+  const { userId } = await auth()
 
   if (!userId) {
-    redirect("/iniciar-sesion");
+    redirect('/iniciar-sesion')
   }
 
   const usuario = await db.usuario.findUnique({
     where: { id: userId },
-  });
+  })
 
-  if (usuario?.rol !== "ADMINISTRADOR") {
-    redirect("/jugador");
+  if (usuario?.rol !== 'ADMINISTRADOR') {
+    redirect('/jugador')
   }
 
   // Obtener cuota con todas sus relaciones
@@ -67,17 +67,17 @@ export default async function PaginaDetalleCuota({ params }: PageProps) {
         include: {
           jugador: true,
           pagos: {
-            where: { estado: "APROBADO" },
-            orderBy: { fechaPago: "desc" },
+            where: { estado: 'APROBADO' },
+            orderBy: { fechaPago: 'desc' },
           },
         },
-        orderBy: { jugador: { nombre: "asc" } },
+        orderBy: { jugador: { nombre: 'asc' } },
       },
     },
-  });
+  })
 
   if (!cuota) {
-    notFound();
+    notFound()
   }
 
   // Obtener jugadores del torneo que no tienen la cuota asignada
@@ -93,72 +93,72 @@ export default async function PaginaDetalleCuota({ params }: PageProps) {
         },
       },
     },
-    orderBy: { nombre: "asc" },
-  });
+    orderBy: { nombre: 'asc' },
+  })
 
   // Calcular estadísticas
-  const totalAsignaciones = cuota.asignaciones.length;
+  const totalAsignaciones = cuota.asignaciones.length
   const pagadasCompleto = cuota.asignaciones.filter(
-    (a) => a.estadoPago === "PAGADO"
-  ).length;
+    (a) => a.estadoPago === 'PAGADO',
+  ).length
   const parciales = cuota.asignaciones.filter(
-    (a) => a.estadoPago === "PARCIAL"
-  ).length;
+    (a) => a.estadoPago === 'PARCIAL',
+  ).length
   const pendientes = cuota.asignaciones.filter(
-    (a) => a.estadoPago === "PENDIENTE"
-  ).length;
-  const vencida = isPast(cuota.fechaVencimiento);
+    (a) => a.estadoPago === 'PENDIENTE',
+  ).length
+  const vencida = isPast(cuota.fechaVencimiento)
 
   // Calcular recaudación
   const montoTotal = cuota.asignaciones.reduce((acc, a) => {
     const monto = a.montoPersonalizado
       ? Number(a.montoPersonalizado)
-      : Number(cuota.monto);
-    return acc + monto;
-  }, 0);
+      : Number(cuota.monto)
+    return acc + monto
+  }, 0)
 
   const montoRecaudado = cuota.asignaciones.reduce((acc, a) => {
-    const pagosAprobados = a.pagos.reduce((sum, p) => sum + Number(p.monto), 0);
-    return acc + pagosAprobados;
-  }, 0);
+    const pagosAprobados = a.pagos.reduce((sum, p) => sum + Number(p.monto), 0)
+    return acc + pagosAprobados
+  }, 0)
 
   // Mapeo de tipos de cuota
   const tiposCuota: Record<string, string> = {
-    UNICA: "Única",
-    MENSUAL: "Mensual",
-    INSCRIPCION: "Inscripción",
-    EXTRAORDINARIA: "Extraordinaria",
-  };
+    UNICA: 'Única',
+    MENSUAL: 'Mensual',
+    INSCRIPCION: 'Inscripción',
+    EXTRAORDINARIA: 'Extraordinaria',
+  }
 
   const estadosBadge: Record<
     string,
     { className: string; icon: React.ReactNode }
   > = {
     PAGADO: {
-      className: "border-emerald-500/30 text-emerald-400 bg-emerald-500/10",
+      className: 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10',
       icon: <CheckCircle className="h-3 w-3" />,
     },
     PARCIAL: {
-      className: "border-amber-500/30 text-amber-400 bg-amber-500/10",
+      className: 'border-amber-500/30 text-amber-400 bg-amber-500/10',
       icon: <CircleDollarSign className="h-3 w-3" />,
     },
     PENDIENTE: {
-      className: "border-zinc-600 text-zinc-400 bg-zinc-800",
+      className: 'border-zinc-600 text-zinc-400 bg-zinc-800',
       icon: <Clock className="h-3 w-3" />,
     },
-  };
+  }
 
   const estadosLabel: Record<string, string> = {
-    PAGADO: "Pagado",
-    PARCIAL: "Parcial",
-    PENDIENTE: "Pendiente",
-  };
+    PAGADO: 'Pagado',
+    PARCIAL: 'Parcial',
+    PENDIENTE: 'Pendiente',
+  }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 overflow-hidden">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div className="flex items-start gap-4">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-start gap-3 sm:gap-4 min-w-0">
           <Button
             variant="outline"
             size="icon"
@@ -169,19 +169,21 @@ export default async function PaginaDetalleCuota({ params }: PageProps) {
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold text-white">{cuota.nombre}</h1>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white truncate">
+                {cuota.nombre}
+              </h1>
               <Badge
                 variant="outline"
-                className="border-emerald-500/30 text-emerald-400"
+                className="border-emerald-500/30 text-emerald-400 shrink-0"
               >
                 {tiposCuota[cuota.tipo]}
               </Badge>
               {vencida && (
                 <Badge
                   variant="outline"
-                  className="border-red-500/30 text-red-400"
+                  className="border-red-500/30 text-red-400 shrink-0"
                 >
                   <AlertTriangle className="h-3 w-3 mr-1" />
                   Vencida
@@ -189,16 +191,18 @@ export default async function PaginaDetalleCuota({ params }: PageProps) {
               )}
             </div>
             {cuota.descripcion && (
-              <p className="text-zinc-400">{cuota.descripcion}</p>
+              <p className="text-zinc-400 text-sm sm:text-base">
+                {cuota.descripcion}
+              </p>
             )}
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full sm:w-auto">
           <Button
             variant="outline"
             asChild
-            className="border-zinc-700 text-zinc-300"
+            className="border-zinc-700 text-zinc-300 flex-1 sm:flex-none"
           >
             <Link href={`/admin/cuotas/${cuota.id}/editar`}>
               <Pencil className="mr-2 h-4 w-4" />
@@ -210,52 +214,52 @@ export default async function PaginaDetalleCuota({ params }: PageProps) {
       </div>
 
       {/* Tarjetas de información */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="bg-zinc-900 border-zinc-800">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                <CreditCard className="h-5 w-5 text-emerald-400" />
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
+        <Card className="bg-zinc-900 border-zinc-800 min-w-0">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
+                <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-400" />
               </div>
-              <div>
-                <p className="text-sm text-zinc-400">Monto</p>
-                <p className="text-xl font-bold text-white">
-                  ${Number(cuota.monto).toLocaleString("es-AR")}
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-zinc-400">Monto</p>
+                <p className="text-lg sm:text-xl font-bold text-white truncate">
+                  ${Number(cuota.monto).toLocaleString('es-AR')}
                 </p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-900 border-zinc-800">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                <Calendar className="h-5 w-5 text-blue-400" />
+        <Card className="bg-zinc-900 border-zinc-800 min-w-0">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400" />
               </div>
-              <div>
-                <p className="text-sm text-zinc-400">Vencimiento</p>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-zinc-400">Vencimiento</p>
                 <p
-                  className={`text-xl font-bold ${
-                    vencida ? "text-red-400" : "text-white"
+                  className={`text-base sm:text-xl font-bold truncate ${
+                    vencida ? 'text-red-400' : 'text-white'
                   }`}
                 >
-                  {format(cuota.fechaVencimiento, "d MMM yyyy", { locale: es })}
+                  {format(cuota.fechaVencimiento, 'd MMM yyyy', { locale: es })}
                 </p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-900 border-zinc-800">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                <Trophy className="h-5 w-5 text-purple-400" />
+        <Card className="bg-zinc-900 border-zinc-800 min-w-0">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
+                <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-purple-400" />
               </div>
-              <div>
-                <p className="text-sm text-zinc-400">Torneo</p>
-                <p className="text-lg font-semibold text-white truncate">
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-zinc-400">Torneo</p>
+                <p className="text-sm sm:text-lg font-semibold text-white truncate">
                   {cuota.torneo.nombre}
                 </p>
               </div>
@@ -263,19 +267,19 @@ export default async function PaginaDetalleCuota({ params }: PageProps) {
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-900 border-zinc-800">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                <CircleDollarSign className="h-5 w-5 text-amber-400" />
+        <Card className="bg-zinc-900 border-zinc-800 min-w-0">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                <CircleDollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-amber-400" />
               </div>
-              <div>
-                <p className="text-sm text-zinc-400">Recaudado</p>
-                <p className="text-xl font-bold text-white">
-                  ${montoRecaudado.toLocaleString("es-AR")}
-                  <span className="text-sm text-zinc-500 font-normal">
-                    {" "}
-                    / ${montoTotal.toLocaleString("es-AR")}
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-zinc-400">Recaudado</p>
+                <p className="text-base sm:text-xl font-bold text-white truncate">
+                  ${montoRecaudado.toLocaleString('es-AR')}
+                  <span className="text-xs sm:text-sm text-zinc-500 font-normal">
+                    {' '}
+                    / ${montoTotal.toLocaleString('es-AR')}
                   </span>
                 </p>
               </div>
@@ -364,15 +368,17 @@ export default async function PaginaDetalleCuota({ params }: PageProps) {
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <Table>
+              <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+                <Table className="min-w-[600px]">
                   <TableHeader>
                     <TableRow className="border-zinc-800 hover:bg-transparent">
                       <TableHead className="text-zinc-400">Jugador</TableHead>
                       <TableHead className="text-zinc-400">Monto</TableHead>
                       <TableHead className="text-zinc-400">Estado</TableHead>
-                      <TableHead className="text-zinc-400">Pagado</TableHead>
-                      <TableHead className="text-zinc-400">
+                      <TableHead className="text-zinc-400 hidden sm:table-cell">
+                        Pagado
+                      </TableHead>
+                      <TableHead className="text-zinc-400 hidden md:table-cell">
                         Último pago
                       </TableHead>
                     </TableRow>
@@ -381,12 +387,12 @@ export default async function PaginaDetalleCuota({ params }: PageProps) {
                     {cuota.asignaciones.map((asignacion) => {
                       const montoAsignado = asignacion.montoPersonalizado
                         ? Number(asignacion.montoPersonalizado)
-                        : Number(cuota.monto);
+                        : Number(cuota.monto)
                       const montoPagado = asignacion.pagos.reduce(
                         (sum, p) => sum + Number(p.monto),
-                        0
-                      );
-                      const ultimoPago = asignacion.pagos[0];
+                        0,
+                      )
+                      const ultimoPago = asignacion.pagos[0]
 
                       return (
                         <TableRow
@@ -416,7 +422,7 @@ export default async function PaginaDetalleCuota({ params }: PageProps) {
                           </TableCell>
                           <TableCell>
                             <span className="text-white">
-                              ${montoAsignado.toLocaleString("es-AR")}
+                              ${montoAsignado.toLocaleString('es-AR')}
                             </span>
                             {asignacion.montoPersonalizado && (
                               <Badge
@@ -438,25 +444,25 @@ export default async function PaginaDetalleCuota({ params }: PageProps) {
                               {estadosLabel[asignacion.estadoPago]}
                             </Badge>
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="hidden sm:table-cell">
                             <span
                               className={
                                 montoPagado >= montoAsignado
-                                  ? "text-emerald-400"
-                                  : "text-white"
+                                  ? 'text-emerald-400'
+                                  : 'text-white'
                               }
                             >
-                              ${montoPagado.toLocaleString("es-AR")}
+                              ${montoPagado.toLocaleString('es-AR')}
                             </span>
                             <span className="text-zinc-500">
-                              {" "}
-                              / ${montoAsignado.toLocaleString("es-AR")}
+                              {' '}
+                              / ${montoAsignado.toLocaleString('es-AR')}
                             </span>
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="hidden md:table-cell">
                             {ultimoPago ? (
                               <span className="text-zinc-300">
-                                {format(ultimoPago.fechaPago, "d MMM yyyy", {
+                                {format(ultimoPago.fechaPago, 'd MMM yyyy', {
                                   locale: es,
                                 })}
                               </span>
@@ -465,7 +471,7 @@ export default async function PaginaDetalleCuota({ params }: PageProps) {
                             )}
                           </TableCell>
                         </TableRow>
-                      );
+                      )
                     })}
                   </TableBody>
                 </Table>
@@ -485,5 +491,5 @@ export default async function PaginaDetalleCuota({ params }: PageProps) {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }

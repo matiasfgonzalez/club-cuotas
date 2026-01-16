@@ -85,7 +85,9 @@ export default async function PaginaDetalleTorneo({ params }: PageProps) {
   const jugadoresInscritos = torneo.inscripciones.map((i) => i.jugadorId)
   const jugadoresDisponibles = await db.jugador.findMany({
     where: {
-      id: { notIn: jugadoresInscritos.length > 0 ? jugadoresInscritos : ['none'] },
+      id: {
+        notIn: jugadoresInscritos.length > 0 ? jugadoresInscritos : ['none'],
+      },
       activo: true,
     },
     include: { usuarios: true },
@@ -96,14 +98,17 @@ export default async function PaginaDetalleTorneo({ params }: PageProps) {
   const jugadoresConEstado = torneo.inscripciones.map((inscripcion) => {
     const cuotasDelTorneo = inscripcion.jugador.cuotasAsignadas
     const totalCuotas = cuotasDelTorneo.length
-    const cuotasPagadas = cuotasDelTorneo.filter((cj) => cj.estadoPago === 'PAGADO').length
+    const cuotasPagadas = cuotasDelTorneo.filter(
+      (cj) => cj.estadoPago === 'PAGADO',
+    ).length
     const cuotasPendientes = cuotasDelTorneo.filter(
-      (cj) => cj.estadoPago === 'PENDIENTE' || cj.estadoPago === 'PARCIAL'
+      (cj) => cj.estadoPago === 'PENDIENTE' || cj.estadoPago === 'PARCIAL',
     ).length
 
     const deudaTotal = cuotasDelTorneo.reduce((sum, cj) => {
       if (cj.estadoPago === 'PAGADO') return sum
-      const monto = cj.montoPersonalizado?.toNumber() || cj.cuota.monto.toNumber()
+      const monto =
+        cj.montoPersonalizado?.toNumber() || cj.cuota.monto.toNumber()
       const pagado = cj.pagos
         .filter((p) => p.estado === 'APROBADO')
         .reduce((s, p) => s + p.monto.toNumber(), 0)
@@ -141,26 +146,31 @@ export default async function PaginaDetalleTorneo({ params }: PageProps) {
     )
   }, 0)
 
-  const totalPendiente = jugadoresConEstado.reduce((sum, j) => sum + j.deudaTotal, 0)
+  const totalPendiente = jugadoresConEstado.reduce(
+    (sum, j) => sum + j.deudaTotal,
+    0,
+  )
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 overflow-hidden">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-start gap-3 sm:gap-4 min-w-0">
           <Button
             variant="outline"
             size="icon"
             asChild
-            className="border-zinc-700"
+            className="border-zinc-700 shrink-0"
           >
             <Link href="/admin/torneos">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold text-white">{torneo.nombre}</h1>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white truncate">
+                {torneo.nombre}
+              </h1>
               <Badge
                 variant="outline"
                 className={
@@ -189,26 +199,28 @@ export default async function PaginaDetalleTorneo({ params }: PageProps) {
       </div>
 
       {/* Info del torneo */}
-      <div className="grid gap-4 sm:grid-cols-4">
-        <Card className="bg-zinc-900 border-zinc-800">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-zinc-500" />
-              <div>
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
+        <Card className="bg-zinc-900 border-zinc-800 min-w-0">
+          <CardContent className="p-3 sm:pt-6 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-zinc-500 shrink-0" />
+              <div className="min-w-0">
                 <p className="text-xs text-zinc-500">Inicio</p>
-                <p className="text-white font-medium">
-                  {format(torneo.fechaInicio, "d MMM yyyy", { locale: es })}
+                <p className="text-white font-medium text-sm sm:text-base truncate">
+                  {format(torneo.fechaInicio, 'd MMM yyyy', {
+                    locale: es,
+                  })}
                 </p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-900 border-zinc-800">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <Users className="h-5 w-5 text-emerald-400" />
-              <div>
+        <Card className="bg-zinc-900 border-zinc-800 min-w-0">
+          <CardContent className="p-3 sm:pt-6 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Users className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-400 shrink-0" />
+              <div className="min-w-0">
                 <p className="text-xs text-zinc-500">Jugadores</p>
                 <p className="text-white font-medium">
                   {torneo.inscripciones.length}
@@ -218,13 +230,13 @@ export default async function PaginaDetalleTorneo({ params }: PageProps) {
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-900 border-zinc-800">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-              <div>
+        <Card className="bg-zinc-900 border-zinc-800 min-w-0">
+          <CardContent className="p-3 sm:pt-6 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-400 shrink-0" />
+              <div className="min-w-0">
                 <p className="text-xs text-zinc-500">Recaudado</p>
-                <p className="text-white font-medium">
+                <p className="text-white font-medium text-sm sm:text-base truncate">
                   ${totalRecaudado.toLocaleString('es-AR')}
                 </p>
               </div>
@@ -232,13 +244,13 @@ export default async function PaginaDetalleTorneo({ params }: PageProps) {
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-900 border-zinc-800">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="h-5 w-5 text-amber-400" />
-              <div>
+        <Card className="bg-zinc-900 border-zinc-800 min-w-0">
+          <CardContent className="p-3 sm:pt-6 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-400 shrink-0" />
+              <div className="min-w-0">
                 <p className="text-xs text-zinc-500">Pendiente</p>
-                <p className="text-white font-medium">
+                <p className="text-white font-medium text-sm sm:text-base truncate">
                   ${totalPendiente.toLocaleString('es-AR')}
                 </p>
               </div>
@@ -249,7 +261,7 @@ export default async function PaginaDetalleTorneo({ params }: PageProps) {
 
       {/* Cuotas del torneo */}
       <Card className="bg-zinc-900 border-zinc-800">
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <CardTitle className="text-white flex items-center gap-2">
               <CreditCard className="h-5 w-5 text-emerald-400" />
@@ -259,7 +271,11 @@ export default async function PaginaDetalleTorneo({ params }: PageProps) {
               {torneo.cuotas.length} cuotas configuradas
             </CardDescription>
           </div>
-          <Button asChild size="sm" className="bg-emerald-500 hover:bg-emerald-600">
+          <Button
+            asChild
+            size="sm"
+            className="bg-emerald-500 hover:bg-emerald-600 w-full sm:w-auto"
+          >
             <Link href={`/admin/cuotas/nueva?torneo=${torneo.id}`}>
               <Plus className="mr-2 h-4 w-4" />
               Nueva cuota
@@ -280,7 +296,10 @@ export default async function PaginaDetalleTorneo({ params }: PageProps) {
                 >
                   <div className="flex items-center justify-between mb-2">
                     <p className="font-medium text-white">{cuota.nombre}</p>
-                    <Badge variant="outline" className="text-xs font-semibold bg-zinc-700/50 text-white border-zinc-600 px-3 py-1 uppercase tracking-wider">
+                    <Badge
+                      variant="outline"
+                      className="text-xs font-semibold bg-zinc-700/50 text-white border-zinc-600 px-3 py-1 uppercase tracking-wider"
+                    >
                       {cuota.tipo}
                     </Badge>
                   </div>
@@ -288,7 +307,10 @@ export default async function PaginaDetalleTorneo({ params }: PageProps) {
                     ${cuota.monto.toNumber().toLocaleString('es-AR')}
                   </p>
                   <p className="text-xs text-zinc-500 mt-1">
-                    Vence: {format(cuota.fechaVencimiento, "d 'de' MMMM", { locale: es })}
+                    Vence:{' '}
+                    {format(cuota.fechaVencimiento, "d 'de' MMMM", {
+                      locale: es,
+                    })}
                   </p>
                 </div>
               ))}
@@ -320,14 +342,14 @@ export default async function PaginaDetalleTorneo({ params }: PageProps) {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
+            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+              <table className="w-full min-w-[500px]">
                 <thead>
                   <tr className="border-b border-zinc-800">
                     <th className="text-left py-3 px-4 text-xs font-medium text-zinc-500 uppercase">
                       Jugador
                     </th>
-                    <th className="text-center py-3 px-4 text-xs font-medium text-zinc-500 uppercase">
+                    <th className="text-center py-3 px-4 text-xs font-medium text-zinc-500 uppercase hidden sm:table-cell">
                       Cuotas
                     </th>
                     <th className="text-center py-3 px-4 text-xs font-medium text-zinc-500 uppercase">
@@ -339,63 +361,76 @@ export default async function PaginaDetalleTorneo({ params }: PageProps) {
                   </tr>
                 </thead>
                 <tbody>
-                  {jugadoresConEstado.map(({ jugador, usuarios, cuotasPagadas, cuotasPendientes, deudaTotal, estado }) => (
-                    <tr
-                      key={jugador.id}
-                      className="border-b border-zinc-800/50 hover:bg-zinc-800/30"
-                    >
-                      <td className="py-4 px-4">
-                        <Link
-                          href={`/admin/jugadores/${jugador.id}`}
-                          className="hover:underline"
-                        >
-                          <p className="font-medium text-white">
-                            {jugador.nombre}
-                          </p>
-                          <p className="text-sm text-zinc-500">
-                            {usuarios[0]?.email || 'Sin usuario asociado'}
-                          </p>
-                        </Link>
-                      </td>
-                      <td className="py-4 px-4 text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          <span className="text-emerald-400">{cuotasPagadas}</span>
-                          <span className="text-zinc-600">/</span>
-                          <span className="text-zinc-400">
-                            {cuotasPagadas + cuotasPendientes}
+                  {jugadoresConEstado.map(
+                    ({
+                      jugador,
+                      usuarios,
+                      cuotasPagadas,
+                      cuotasPendientes,
+                      deudaTotal,
+                      estado,
+                    }) => (
+                      <tr
+                        key={jugador.id}
+                        className="border-b border-zinc-800/50 hover:bg-zinc-800/30"
+                      >
+                        <td className="py-4 px-4">
+                          <Link
+                            href={`/admin/jugadores/${jugador.id}`}
+                            className="hover:underline"
+                          >
+                            <p className="font-medium text-white">
+                              {jugador.nombre}
+                            </p>
+                            <p className="text-sm text-zinc-500">
+                              {usuarios[0]?.email || 'Sin usuario asociado'}
+                            </p>
+                          </Link>
+                        </td>
+                        <td className="py-4 px-4 text-center hidden sm:table-cell">
+                          <div className="flex items-center justify-center gap-2">
+                            <span className="text-emerald-400">
+                              {cuotasPagadas}
+                            </span>
+                            <span className="text-zinc-600">/</span>
+                            <span className="text-zinc-400">
+                              {cuotasPagadas + cuotasPendientes}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4 text-center">
+                          {estado === 'AL_DIA' && (
+                            <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                              Al día
+                            </Badge>
+                          )}
+                          {estado === 'PENDIENTE' && (
+                            <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/30">
+                              <Clock className="h-3 w-3 mr-1" />
+                              Pendiente
+                            </Badge>
+                          )}
+                          {estado === 'SIN_CUOTAS' && (
+                            <Badge className="bg-zinc-500/10 text-zinc-400 border-zinc-500/30">
+                              Sin cuotas
+                            </Badge>
+                          )}
+                        </td>
+                        <td className="py-4 px-4 text-right">
+                          <span
+                            className={`font-medium ${
+                              deudaTotal > 0
+                                ? 'text-amber-400'
+                                : 'text-zinc-500'
+                            }`}
+                          >
+                            ${deudaTotal.toLocaleString('es-AR')}
                           </span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 text-center">
-                        {estado === 'AL_DIA' && (
-                          <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-                            <CheckCircle2 className="h-3 w-3 mr-1" />
-                            Al día
-                          </Badge>
-                        )}
-                        {estado === 'PENDIENTE' && (
-                          <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/30">
-                            <Clock className="h-3 w-3 mr-1" />
-                            Pendiente
-                          </Badge>
-                        )}
-                        {estado === 'SIN_CUOTAS' && (
-                          <Badge className="bg-zinc-500/10 text-zinc-400 border-zinc-500/30">
-                            Sin cuotas
-                          </Badge>
-                        )}
-                      </td>
-                      <td className="py-4 px-4 text-right">
-                        <span
-                          className={`font-medium ${
-                            deudaTotal > 0 ? 'text-amber-400' : 'text-zinc-500'
-                          }`}
-                        >
-                          ${deudaTotal.toLocaleString('es-AR')}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                      </tr>
+                    ),
+                  )}
                 </tbody>
               </table>
             </div>

@@ -24,7 +24,9 @@ interface BotonAprobacionProps {
 }
 
 export function BotonAprobacion({ pagoId }: BotonAprobacionProps) {
-  const [dialogoAbierto, setDialogoAbierto] = useState<'aprobar' | 'rechazar' | null>(null)
+  const [dialogoAbierto, setDialogoAbierto] = useState<
+    'aprobar' | 'rechazar' | null
+  >(null)
   const [notas, setNotas] = useState('')
   const [cargando, setCargando] = useState(false)
 
@@ -53,33 +55,39 @@ export function BotonAprobacion({ pagoId }: BotonAprobacionProps) {
 
   return (
     <>
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-col sm:flex-row">
         <Button
           onClick={() => setDialogoAbierto('aprobar')}
-          className="bg-emerald-500 hover:bg-emerald-600 text-white"
+          className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs sm:text-sm"
+          size="sm"
         >
-          <CheckCircle2 className="mr-2 h-4 w-4" />
+          <CheckCircle2 className="mr-1 sm:mr-2 h-4 w-4" />
           Aprobar
         </Button>
         <Button
           onClick={() => setDialogoAbierto('rechazar')}
           variant="outline"
-          className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+          className="border-red-500/30 text-red-400 hover:bg-red-500/10 text-xs sm:text-sm"
+          size="sm"
         >
-          <XCircle className="mr-2 h-4 w-4" />
+          <XCircle className="mr-1 sm:mr-2 h-4 w-4" />
           Rechazar
         </Button>
       </div>
 
       {/* Diálogo de aprobación */}
-      <AlertDialog open={dialogoAbierto === 'aprobar'} onOpenChange={() => setDialogoAbierto(null)}>
+      <AlertDialog
+        open={dialogoAbierto === 'aprobar'}
+        onOpenChange={() => setDialogoAbierto(null)}
+      >
         <AlertDialogContent className="bg-zinc-900 border-zinc-800">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">
               ¿Aprobar este pago?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-zinc-400">
-              El pago será marcado como aprobado y la cuota del jugador se actualizará.
+              El pago será marcado como aprobado y la cuota del jugador se
+              actualizará.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="my-4">
@@ -111,14 +119,18 @@ export function BotonAprobacion({ pagoId }: BotonAprobacionProps) {
       </AlertDialog>
 
       {/* Diálogo de rechazo */}
-      <AlertDialog open={dialogoAbierto === 'rechazar'} onOpenChange={() => setDialogoAbierto(null)}>
+      <AlertDialog
+        open={dialogoAbierto === 'rechazar'}
+        onOpenChange={() => setDialogoAbierto(null)}
+      >
         <AlertDialogContent className="bg-zinc-900 border-zinc-800">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">
               ¿Rechazar este pago?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-zinc-400">
-              El pago será marcado como rechazado. Es recomendable indicar el motivo.
+              El pago será marcado como rechazado. Es recomendable indicar el
+              motivo.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="my-4">
