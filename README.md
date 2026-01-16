@@ -159,6 +159,11 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL
 NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL
 ```
 
+## Script reiniciar base de datos
+```
+npx prisma db execute --file .\reset_db.sql`
+```
+
 ## 📝 Licencia
 
 MIT License - Usa este proyecto libremente.
