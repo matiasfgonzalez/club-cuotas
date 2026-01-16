@@ -1,18 +1,18 @@
 // Página de detalle/edición de jugador
 
-import { auth } from '@clerk/nextjs/server'
-import { redirect, notFound } from 'next/navigation'
-import { db } from '@/lib/db'
+import { auth } from "@clerk/nextjs/server";
+import { redirect, notFound } from "next/navigation";
+import { db } from "@/lib/db";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import Link from 'next/link'
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 import {
   User,
   Mail,
@@ -27,28 +27,29 @@ import {
   CheckCircle2,
   AlertTriangle,
   UserCheck,
-} from 'lucide-react'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
+  Pencil,
+} from "lucide-react";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
 interface PageProps {
-  params: Promise<{ id: string }>
+  params: Promise<{ id: string }>;
 }
 
 export default async function PaginaDetalleJugador({ params }: PageProps) {
-  const { id } = await params
-  const { userId } = await auth()
+  const { id } = await params;
+  const { userId } = await auth();
 
   if (!userId) {
-    redirect('/iniciar-sesion')
+    redirect("/iniciar-sesion");
   }
 
   const usuario = await db.usuario.findUnique({
     where: { id: userId },
-  })
+  });
 
-  if (usuario?.rol !== 'ADMINISTRADOR') {
-    redirect('/jugador')
+  if (usuario?.rol !== "ADMINISTRADOR") {
+    redirect("/jugador");
   }
 
   // Obtener jugador con todos sus datos
@@ -76,30 +77,31 @@ export default async function PaginaDetalleJugador({ params }: PageProps) {
           pagos: true,
         },
         orderBy: {
-          cuota: { fechaVencimiento: 'desc' },
+          cuota: { fechaVencimiento: "desc" },
         },
       },
     },
-  })
+  });
 
   if (!jugador) {
-    notFound()
+    notFound();
   }
 
   const cuotasPendientes = jugador.cuotasAsignadas.filter(
-    (cj) => cj.estadoPago === 'PENDIENTE' || cj.estadoPago === 'PARCIAL'
-  )
+    (cj) => cj.estadoPago === "PENDIENTE" || cj.estadoPago === "PARCIAL"
+  );
   const cuotasPagadas = jugador.cuotasAsignadas.filter(
-    (cj) => cj.estadoPago === 'PAGADO'
-  )
+    (cj) => cj.estadoPago === "PAGADO"
+  );
 
   const totalPendiente = cuotasPendientes.reduce((sum, cj) => {
-    const monto = cj.montoPersonalizado?.toNumber() || cj.cuota.monto.toNumber()
+    const monto =
+      cj.montoPersonalizado?.toNumber() || cj.cuota.monto.toNumber();
     const pagado = cj.pagos
-      .filter((p) => p.estado === 'APROBADO')
-      .reduce((s, p) => s + p.monto.toNumber(), 0)
-    return sum + (monto - pagado)
-  }, 0)
+      .filter((p) => p.estado === "APROBADO")
+      .reduce((s, p) => s + p.monto.toNumber(), 0);
+    return sum + (monto - pagado);
+  }, 0);
 
   return (
     <div className="space-y-8">
@@ -117,26 +119,36 @@ export default async function PaginaDetalleJugador({ params }: PageProps) {
             </Link>
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-white">
-              {jugador.nombre}
-            </h1>
+            <h1 className="text-3xl font-bold text-white">{jugador.nombre}</h1>
             <p className="text-zinc-400 mt-1">
-              {jugador.posicion || 'Sin posición asignada'}
+              {jugador.posicion || "Sin posición asignada"}
             </p>
           </div>
         </div>
-        <Badge
-          variant="outline"
-          className={
-            jugador.usuarios.length > 0
-              ? 'border-emerald-500/30 text-emerald-400'
-              : 'border-zinc-600 text-zinc-400'
-          }
-        >
-          {jugador.usuarios.length > 0 
-            ? `${jugador.usuarios.length} usuario(s) asociado(s)`
-            : 'Sin usuarios asociados'}
-        </Badge>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            asChild
+            className="border-zinc-700 text-zinc-300"
+          >
+            <Link href={`/admin/jugadores/${jugador.id}/editar`}>
+              <Pencil className="mr-2 h-4 w-4" />
+              Editar
+            </Link>
+          </Button>
+          <Badge
+            variant="outline"
+            className={
+              jugador.usuarios.length > 0
+                ? "border-emerald-500/30 text-emerald-400"
+                : "border-zinc-600 text-zinc-400"
+            }
+          >
+            {jugador.usuarios.length > 0
+              ? `${jugador.usuarios.length} usuario(s) asociado(s)`
+              : "Sin usuarios asociados"}
+          </Badge>
+        </div>
       </div>
 
       {/* Información del jugador */}
@@ -156,11 +168,14 @@ export default async function PaginaDetalleJugador({ params }: PageProps) {
                 <span className="text-zinc-300">CUIT: {jugador.cuit}</span>
               </div>
             )}
-            {jugador.usuarios.map(usr => (
+            {jugador.usuarios.map((usr) => (
               <div key={usr.id} className="flex items-center gap-3">
                 <Mail className="h-4 w-4 text-zinc-500" />
                 <span className="text-zinc-300">
-                  {usr.email} <span className="text-zinc-500 text-xs">({usr.nombreCompleto})</span>
+                  {usr.email}{" "}
+                  <span className="text-zinc-500 text-xs">
+                    ({usr.nombreCompleto})
+                  </span>
                 </span>
               </div>
             ))}
@@ -224,7 +239,7 @@ export default async function PaginaDetalleJugador({ params }: PageProps) {
               <div className="text-center p-4 rounded-xl bg-zinc-800/50">
                 <AlertTriangle className="h-6 w-6 text-red-400 mx-auto mb-2" />
                 <p className="text-2xl font-bold text-white">
-                  ${totalPendiente.toLocaleString('es-AR')}
+                  ${totalPendiente.toLocaleString("es-AR")}
                 </p>
                 <p className="text-xs text-zinc-500">Deuda total</p>
               </div>
@@ -265,8 +280,8 @@ export default async function PaginaDetalleJugador({ params }: PageProps) {
                         {inscripcion.torneo.nombre}
                       </p>
                       <p className="text-xs text-zinc-500">
-                        Inscrito:{' '}
-                        {format(inscripcion.fechaInscripcion, 'dd/MM/yyyy')}
+                        Inscrito:{" "}
+                        {format(inscripcion.fechaInscripcion, "dd/MM/yyyy")}
                       </p>
                     </div>
                   </div>
@@ -290,11 +305,12 @@ export default async function PaginaDetalleJugador({ params }: PageProps) {
             <div className="space-y-3">
               {cuotasPendientes.map((cj) => {
                 const monto =
-                  cj.montoPersonalizado?.toNumber() || cj.cuota.monto.toNumber()
+                  cj.montoPersonalizado?.toNumber() ||
+                  cj.cuota.monto.toNumber();
                 const pagado = cj.pagos
-                  .filter((p) => p.estado === 'APROBADO')
-                  .reduce((s, p) => s + p.monto.toNumber(), 0)
-                const pendiente = monto - pagado
+                  .filter((p) => p.estado === "APROBADO")
+                  .reduce((s, p) => s + p.monto.toNumber(), 0);
+                const pendiente = monto - pagado;
 
                 return (
                   <div
@@ -302,12 +318,14 @@ export default async function PaginaDetalleJugador({ params }: PageProps) {
                     className="flex items-center justify-between p-4 rounded-xl border border-zinc-700 bg-zinc-800/50"
                   >
                     <div>
-                      <p className="font-medium text-white">{cj.cuota.nombre}</p>
+                      <p className="font-medium text-white">
+                        {cj.cuota.nombre}
+                      </p>
                       <p className="text-sm text-zinc-500">
                         {cj.cuota.torneo.nombre}
                       </p>
                       <p className="text-xs text-zinc-400 mt-1">
-                        Vence:{' '}
+                        Vence:{" "}
                         {format(cj.cuota.fechaVencimiento, "d 'de' MMMM", {
                           locale: es,
                         })}
@@ -315,21 +333,21 @@ export default async function PaginaDetalleJugador({ params }: PageProps) {
                     </div>
                     <div className="text-right">
                       <p className="text-lg font-bold text-amber-400">
-                        ${pendiente.toLocaleString('es-AR')}
+                        ${pendiente.toLocaleString("es-AR")}
                       </p>
                       {pagado > 0 && (
                         <p className="text-xs text-zinc-500">
-                          Pagado: ${pagado.toLocaleString('es-AR')}
+                          Pagado: ${pagado.toLocaleString("es-AR")}
                         </p>
                       )}
                     </div>
                   </div>
-                )
+                );
               })}
             </div>
           </CardContent>
         </Card>
       )}
     </div>
-  )
+  );
 }
