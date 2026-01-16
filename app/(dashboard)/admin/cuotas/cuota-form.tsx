@@ -1,84 +1,84 @@
-'use client'
+"use client";
 
 // Formulario de creación/edición de cuota
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { toast } from 'sonner'
-import { CreditCard, Loader2, ArrowLeft } from 'lucide-react'
-import Link from 'next/link'
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import { CreditCard, Loader2, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 interface Torneo {
-  id: string
-  nombre: string
+  id: string;
+  nombre: string;
 }
 
 interface CuotaFormProps {
-  torneos: Torneo[]
+  torneos: Torneo[];
   cuota?: {
-    id: string
-    torneoId: string
-    tipo: string
-    nombre: string
-    descripcion: string
-    monto: number
-    fechaVencimiento: string
-  }
+    id: string;
+    torneoId: string;
+    tipo: string;
+    nombre: string;
+    descripcion: string;
+    monto: number;
+    fechaVencimiento: string;
+  };
 }
 
 const TIPOS_CUOTA = [
-  { value: 'MENSUAL', label: 'Mensual' },
-  { value: 'UNICA', label: 'Única' },
-  { value: 'INSCRIPCION', label: 'Inscripción' },
-  { value: 'EXTRAORDINARIA', label: 'Extraordinaria' },
-]
+  { value: "MENSUAL", label: "Mensual" },
+  { value: "UNICA", label: "Única" },
+  { value: "INSCRIPCION", label: "Inscripción" },
+  { value: "EXTRAORDINARIA", label: "Extraordinaria" },
+];
 
 export function CuotaForm({ torneos, cuota }: CuotaFormProps) {
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
-  const isEditing = !!cuota
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const isEditing = !!cuota;
 
   const [formData, setFormData] = useState({
-    torneoId: cuota?.torneoId || '',
-    tipo: cuota?.tipo || 'MENSUAL',
-    nombre: cuota?.nombre || '',
-    descripcion: cuota?.descripcion || '',
-    monto: cuota?.monto?.toString() || '',
-    fechaVencimiento: cuota?.fechaVencimiento || '',
-  })
+    torneoId: cuota?.torneoId || "",
+    tipo: cuota?.tipo || "MENSUAL",
+    nombre: cuota?.nombre || "",
+    descripcion: cuota?.descripcion || "",
+    monto: cuota?.monto?.toString() || "",
+    fechaVencimiento: cuota?.fechaVencimiento || "",
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
-      const url = isEditing 
-        ? `/api/admin/cuotas/${cuota.id}` 
-        : '/api/admin/cuotas'
-      
-      const method = isEditing ? 'PUT' : 'POST'
+      const url = isEditing
+        ? `/api/admin/cuotas/${cuota.id}`
+        : "/api/admin/cuotas";
+
+      const method = isEditing ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           torneoId: formData.torneoId,
@@ -88,22 +88,26 @@ export function CuotaForm({ torneos, cuota }: CuotaFormProps) {
           monto: parseFloat(formData.monto),
           fechaVencimiento: formData.fechaVencimiento,
         }),
-      })
+      });
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Error al guardar')
+        const error = await response.json();
+        throw new Error(error.error || "Error al guardar");
       }
 
-      toast.success(isEditing ? 'Cuota actualizada' : 'Cuota creada correctamente')
-      router.push('/admin/cuotas')
-      router.refresh()
+      toast.success(
+        isEditing ? "Cuota actualizada" : "Cuota creada correctamente"
+      );
+      router.push("/admin/cuotas");
+      router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Error al guardar la cuota')
+      toast.error(
+        error instanceof Error ? error.message : "Error al guardar la cuota"
+      );
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   if (torneos.length === 0) {
     return (
@@ -116,14 +120,15 @@ export function CuotaForm({ torneos, cuota }: CuotaFormProps) {
           <p className="text-zinc-500 text-sm mb-4 text-center">
             Primero debes crear un torneo para poder agregar cuotas
           </p>
-          <Button asChild className="bg-emerald-500 hover:bg-emerald-600 text-white">
-            <Link href="/admin/torneos/nuevo">
-              Crear torneo
-            </Link>
+          <Button
+            asChild
+            className="bg-emerald-500 hover:bg-emerald-600 text-white"
+          >
+            <Link href="/admin/torneos/nuevo">Crear torneo</Link>
           </Button>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -145,16 +150,21 @@ export function CuotaForm({ torneos, cuota }: CuotaFormProps) {
                 Torneo *
               </Label>
               <Select
-                value={formData.torneoId}
-                onValueChange={(value) => setFormData({ ...formData, torneoId: value })}
-                required
+                value={formData.torneoId || undefined}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, torneoId: value })
+                }
               >
                 <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
                   <SelectValue placeholder="Seleccionar torneo" />
                 </SelectTrigger>
                 <SelectContent className="bg-zinc-800 border-zinc-700">
                   {torneos.map((torneo) => (
-                    <SelectItem key={torneo.id} value={torneo.id} className="text-white">
+                    <SelectItem
+                      key={torneo.id}
+                      value={torneo.id}
+                      className="text-white"
+                    >
                       {torneo.nombre}
                     </SelectItem>
                   ))}
@@ -167,15 +177,21 @@ export function CuotaForm({ torneos, cuota }: CuotaFormProps) {
                 Tipo de cuota *
               </Label>
               <Select
-                value={formData.tipo}
-                onValueChange={(value) => setFormData({ ...formData, tipo: value })}
+                value={formData.tipo || undefined}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, tipo: value })
+                }
               >
                 <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-zinc-800 border-zinc-700">
                   {TIPOS_CUOTA.map((tipo) => (
-                    <SelectItem key={tipo.value} value={tipo.value} className="text-white">
+                    <SelectItem
+                      key={tipo.value}
+                      value={tipo.value}
+                      className="text-white"
+                    >
                       {tipo.label}
                     </SelectItem>
                   ))}
@@ -191,7 +207,9 @@ export function CuotaForm({ torneos, cuota }: CuotaFormProps) {
             <Input
               id="nombre"
               value={formData.nombre}
-              onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, nombre: e.target.value })
+              }
               placeholder="Ej: Cuota Mensual Enero 2024"
               className="bg-zinc-800 border-zinc-700 text-white"
               required
@@ -205,7 +223,9 @@ export function CuotaForm({ torneos, cuota }: CuotaFormProps) {
             <Input
               id="descripcion"
               value={formData.descripcion}
-              onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, descripcion: e.target.value })
+              }
               placeholder="Descripción opcional"
               className="bg-zinc-800 border-zinc-700 text-white"
             />
@@ -222,7 +242,9 @@ export function CuotaForm({ torneos, cuota }: CuotaFormProps) {
                 min="0"
                 step="0.01"
                 value={formData.monto}
-                onChange={(e) => setFormData({ ...formData, monto: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, monto: e.target.value })
+                }
                 placeholder="0.00"
                 className="bg-zinc-800 border-zinc-700 text-white"
                 required
@@ -237,7 +259,9 @@ export function CuotaForm({ torneos, cuota }: CuotaFormProps) {
                 id="fechaVencimiento"
                 type="date"
                 value={formData.fechaVencimiento}
-                onChange={(e) => setFormData({ ...formData, fechaVencimiento: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, fechaVencimiento: e.target.value })
+                }
                 className="bg-zinc-800 border-zinc-700 text-white"
                 required
               />
@@ -266,9 +290,9 @@ export function CuotaForm({ torneos, cuota }: CuotaFormProps) {
           className="bg-emerald-500 hover:bg-emerald-600 text-white"
         >
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {isEditing ? 'Guardar cambios' : 'Crear cuota'}
+          {isEditing ? "Guardar cambios" : "Crear cuota"}
         </Button>
       </div>
     </form>
-  )
+  );
 }
