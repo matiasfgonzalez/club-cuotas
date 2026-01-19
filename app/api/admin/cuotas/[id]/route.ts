@@ -26,7 +26,7 @@ export async function GET(request: Request, { params }: RouteParams) {
           include: {
             jugador: true,
             pagos: {
-              where: { estado: "APROBADO" },
+              where: { estado: "APROBADO", eliminado: false },
             },
           },
         },

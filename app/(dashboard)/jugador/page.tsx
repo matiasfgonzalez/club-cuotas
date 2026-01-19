@@ -54,6 +54,7 @@ export default async function PaginaJugadorDashboard() {
         include: { torneo: true },
       },
       pagos: {
+        where: { eliminado: false },
         orderBy: { fechaPago: 'desc' },
       },
     },

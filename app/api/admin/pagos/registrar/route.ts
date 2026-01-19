@@ -58,7 +58,7 @@ export async function GET(request: Request) {
           },
           cuota: { select: { monto: true } },
           pagos: {
-            where: { estado: 'APROBADO' },
+            where: { estado: 'APROBADO', eliminado: false },
             select: { monto: true },
           },
         },
@@ -139,7 +139,7 @@ export async function POST(request: Request) {
       where: { id: cuotaJugadorId },
       include: {
         cuota: true,
-        pagos: { where: { estado: 'APROBADO' } },
+        pagos: { where: { estado: 'APROBADO', eliminado: false } },
       },
     })
 

@@ -53,7 +53,7 @@ export default async function PaginaAdminDashboard() {
   ] = await Promise.all([
     db.jugador.count(),
     db.torneo.count({ where: { activo: true } }),
-    db.pago.count({ where: { estado: 'PENDIENTE' } }),
+    db.pago.count({ where: { estado: 'PENDIENTE', eliminado: false } }),
     db.cuotaJugador.count({
       where: {
         estadoPago: 'PENDIENTE',
@@ -61,6 +61,7 @@ export default async function PaginaAdminDashboard() {
       },
     }),
     db.pago.findMany({
+      where: { eliminado: false },
       take: 5,
       orderBy: { fechaPago: 'desc' },
       include: {
@@ -78,6 +79,7 @@ export default async function PaginaAdminDashboard() {
   const pagosAprobadosMes = await db.pago.aggregate({
     where: {
       estado: 'APROBADO',
+      eliminado: false,
       fechaAprobacion: { gte: inicioMes },
     },
     _sum: { monto: true },

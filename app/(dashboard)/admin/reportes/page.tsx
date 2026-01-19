@@ -53,14 +53,14 @@ export default async function PaginaReportes() {
     db.torneo.count({ where: { activo: true } }),
     db.cuota.count(),
     db.pago.findMany({
-      where: { estado: 'APROBADO' },
+      where: { estado: 'APROBADO', eliminado: false },
       select: { monto: true },
     }),
-    db.pago.count({ where: { estado: 'PENDIENTE' } }),
+    db.pago.count({ where: { estado: 'PENDIENTE', eliminado: false } }),
     db.cuotaJugador.findMany({
       include: {
         cuota: true,
-        pagos: { where: { estado: 'APROBADO' } },
+        pagos: { where: { estado: 'APROBADO', eliminado: false } },
       },
     }),
   ])
@@ -96,6 +96,7 @@ export default async function PaginaReportes() {
   const pagosMesActual = await db.pago.findMany({
     where: {
       estado: 'APROBADO',
+      eliminado: false,
       fechaPago: {
         gte: inicioMes,
         lte: finMes,
@@ -114,6 +115,7 @@ export default async function PaginaReportes() {
   const pagosMesAnterior = await db.pago.findMany({
     where: {
       estado: 'APROBADO',
+      eliminado: false,
       fechaPago: {
         gte: inicioMesAnterior,
         lte: finMesAnterior,
@@ -142,7 +144,7 @@ export default async function PaginaReportes() {
         },
         include: {
           cuota: true,
-          pagos: { where: { estado: 'APROBADO' } },
+          pagos: { where: { estado: 'APROBADO', eliminado: false } },
         },
       },
     },

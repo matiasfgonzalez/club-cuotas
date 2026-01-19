@@ -47,7 +47,7 @@ export default async function PaginaCuotas() {
       asignaciones: {
         include: {
           _count: {
-            select: { pagos: { where: { estado: 'APROBADO' } } },
+            select: { pagos: { where: { estado: 'APROBADO', eliminado: false } } },
           },
         },
       },

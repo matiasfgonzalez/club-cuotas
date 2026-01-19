@@ -146,3 +146,18 @@ export const configuracionBancariaSchema = z.object({
 })
 
 export type ConfiguracionBancariaFormData = z.infer<typeof configuracionBancariaSchema>
+
+// =====================================
+// VALIDACIONES DE ELIMINACIÓN DE PAGO
+// =====================================
+
+export const eliminacionPagoSchema = z.object({
+  pagoId: z.string().min(1, 'ID de pago requerido'),
+  motivo: z
+    .string()
+    .min(10, 'El motivo debe tener al menos 10 caracteres')
+    .max(500, 'El motivo no puede exceder 500 caracteres'),
+})
+
+export type EliminacionPagoFormData = z.infer<typeof eliminacionPagoSchema>
+

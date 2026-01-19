@@ -7,8 +7,10 @@ import { db } from "@/lib/db";
 import {
   pagoSchema,
   aprobacionPagoSchema,
+  eliminacionPagoSchema,
   type PagoFormData,
   type AprobacionPagoFormData,
+  type EliminacionPagoFormData,
 } from "@/lib/validations";
 import type { ResultadoAccion, Pago } from "@/types";
 import { notificarPagoPendiente } from "@/lib/telegram";
@@ -65,6 +67,7 @@ export async function registrarPago(
       where: {
         cuotaJugadorId: cuotaJugador.id,
         estado: "APROBADO",
+        eliminado: false,
       },
     });
 
@@ -184,6 +187,7 @@ export async function procesarPago(
         where: {
           cuotaJugadorId: pago.cuotaJugadorId,
           estado: "APROBADO",
+          eliminado: false,
         },
       });
 
@@ -247,7 +251,7 @@ export async function obtenerPagosPendientes() {
     }
 
     const pagos = await db.pago.findMany({
-      where: { estado: "PENDIENTE" },
+      where: { estado: "PENDIENTE", eliminado: false },
       include: {
         jugador: { include: { usuarios: true } },
         cuotaJugador: { include: { cuota: { include: { torneo: true } } } },
@@ -259,5 +263,107 @@ export async function obtenerPagosPendientes() {
   } catch (error) {
     console.error("Error al obtener pagos pendientes:", error);
     return [];
+  }
+}
+
+// Eliminar un pago (admin) - Soft delete
+export async function eliminarPago(
+  datos: EliminacionPagoFormData
+): Promise<ResultadoAccion<Pago>> {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { exito: false, error: "No autorizado" };
+    }
+
+    // Verificar que es admin
+    const usuario = await db.usuario.findUnique({
+      where: { id: userId },
+    });
+
+    if (usuario?.rol !== "ADMINISTRADOR") {
+      return { exito: false, error: "No tienes permisos de administrador" };
+    }
+
+    // Validar datos
+    const validacion = eliminacionPagoSchema.safeParse(datos);
+    if (!validacion.success) {
+      return {
+        exito: false,
+        error: validacion.error.issues[0].message,
+      };
+    }
+
+    // Buscar el pago
+    const pago = await db.pago.findUnique({
+      where: { id: validacion.data.pagoId },
+      include: { cuotaJugador: { include: { cuota: true } } },
+    });
+
+    if (!pago) {
+      return { exito: false, error: "Pago no encontrado" };
+    }
+
+    if (pago.eliminado) {
+      return { exito: false, error: "Este pago ya fue eliminado" };
+    }
+
+    // Marcar como eliminado (soft delete)
+    const pagoEliminado = await db.pago.update({
+      where: { id: validacion.data.pagoId },
+      data: {
+        eliminado: true,
+        motivoEliminacion: validacion.data.motivo,
+        eliminadoPorId: userId,
+        fechaEliminacion: new Date(),
+      },
+    });
+
+    // Recalcular estado de la cuota del jugador
+    // Solo considerar pagos aprobados y no eliminados
+    const pagosAprobados = await db.pago.findMany({
+      where: {
+        cuotaJugadorId: pago.cuotaJugadorId,
+        estado: "APROBADO",
+        eliminado: false,
+      },
+    });
+
+    const totalPagado = pagosAprobados.reduce(
+      (sum: number, p) => sum + p.monto.toNumber(),
+      0
+    );
+    const montoTotal =
+      pago.cuotaJugador.montoPersonalizado?.toNumber() ||
+      pago.cuotaJugador.cuota.monto.toNumber();
+
+    let nuevoEstado: "PENDIENTE" | "PARCIAL" | "PAGADO" = "PENDIENTE";
+    if (totalPagado >= montoTotal) {
+      nuevoEstado = "PAGADO";
+    } else if (totalPagado > 0) {
+      nuevoEstado = "PARCIAL";
+    }
+
+    await db.cuotaJugador.update({
+      where: { id: pago.cuotaJugadorId },
+      data: { estadoPago: nuevoEstado },
+    });
+
+    revalidatePath("/admin/pagos");
+    revalidatePath("/admin");
+    revalidatePath("/jugador");
+    revalidatePath("/jugador/historial");
+
+    return {
+      exito: true,
+      datos: pagoEliminado,
+      mensaje: "Pago eliminado exitosamente",
+    };
+  } catch (error) {
+    console.error("Error al eliminar pago:", error);
+    return {
+      exito: false,
+      error: error instanceof Error ? error.message : "Error al eliminar pago",
+    };
   }
 }

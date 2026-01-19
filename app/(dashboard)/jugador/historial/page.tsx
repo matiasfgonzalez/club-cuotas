@@ -32,7 +32,7 @@ export default async function PaginaHistorial() {
   }
 
   const pagos = await db.pago.findMany({
-    where: { jugadorId: usuario.jugador.id },
+    where: { jugadorId: usuario.jugador.id, eliminado: false },
     include: {
       cuotaJugador: {
         include: {

@@ -31,7 +31,8 @@ model Usuario {
   jugadorId      String?
   jugador        Jugador?   @relation(fields: [jugadorId], references: [id])
   
-  pagosAprobados Pago[]     @relation("AprobadorPago")
+  pagosAprobados  Pago[]     @relation("AprobadorPago")
+  pagosEliminados Pago[]     @relation("EliminadorPago")
 }
 
 /// Torneo o competencia en la que participan los jugadores
@@ -133,10 +134,17 @@ model Pago {
   aprobadoPorId   String?
   fechaAprobacion DateTime?
 
+  // Campos de eliminación (soft delete)
+  eliminado         Boolean   @default(false)
+  motivoEliminacion String?
+  eliminadoPorId    String?
+  fechaEliminacion  DateTime?
+
   // Relaciones
   cuotaJugador CuotaJugador @relation(fields: [cuotaJugadorId], references: [id], onDelete: Cascade)
   jugador      Jugador      @relation(fields: [jugadorId], references: [id], onDelete: Cascade)
   aprobadoPor  Usuario?     @relation("AprobadorPago", fields: [aprobadoPorId], references: [id])
+  eliminadoPor Usuario?     @relation("EliminadorPago", fields: [eliminadoPorId], references: [id])
 }
 
 /// Configuración de cuentas bancarias del club

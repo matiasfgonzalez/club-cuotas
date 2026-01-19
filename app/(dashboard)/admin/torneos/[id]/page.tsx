@@ -63,7 +63,7 @@ export default async function PaginaDetalleTorneo({ params }: PageProps) {
                 },
                 include: {
                   cuota: true,
-                  pagos: true,
+                  pagos: { where: { eliminado: false } },
                 },
               },
             },

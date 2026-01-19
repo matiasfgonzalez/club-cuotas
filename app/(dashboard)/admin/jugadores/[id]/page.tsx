@@ -74,7 +74,7 @@ export default async function PaginaDetalleJugador({ params }: PageProps) {
           cuota: {
             include: { torneo: true },
           },
-          pagos: true,
+          pagos: { where: { eliminado: false } },
         },
         orderBy: {
           cuota: { fechaVencimiento: "desc" },

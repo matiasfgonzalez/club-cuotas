@@ -44,7 +44,7 @@ export default async function PaginaRegistrarPago({
     },
     include: {
       cuota: { include: { torneo: true } },
-      pagos: { where: { estado: 'APROBADO' } },
+      pagos: { where: { estado: 'APROBADO', eliminado: false } },
     },
     orderBy: { cuota: { fechaVencimiento: 'asc' } },
   })

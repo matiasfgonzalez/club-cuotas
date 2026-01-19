@@ -67,7 +67,7 @@ export default async function PaginaDetalleCuota({ params }: PageProps) {
         include: {
           jugador: true,
           pagos: {
-            where: { estado: 'APROBADO' },
+            where: { estado: 'APROBADO', eliminado: false },
             orderBy: { fechaPago: 'desc' },
           },
         },
