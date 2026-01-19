@@ -1,5 +1,7 @@
+// Página de edición de cuenta bancaria
+
 import { auth } from '@clerk/nextjs/server'
-import { redirect } from 'next/navigation'
+import { redirect, notFound } from 'next/navigation'
 import { db } from '@/lib/db'
 import {
   Card,
@@ -13,7 +15,12 @@ import { ArrowLeft, Landmark } from 'lucide-react'
 import Link from 'next/link'
 import { BancoForm } from '../banco-form'
 
-export default async function NuevaCuentaBancariaPage() {
+interface PageProps {
+  params: Promise<{ id: string }>
+}
+
+export default async function EditarCuentaBancariaPage({ params }: PageProps) {
+  const { id } = await params
   const { userId } = await auth()
 
   if (!userId) {
@@ -26,6 +33,15 @@ export default async function NuevaCuentaBancariaPage() {
 
   if (usuario?.rol !== 'ADMINISTRADOR') {
     redirect('/jugador')
+  }
+
+  // Obtener cuenta bancaria
+  const configuracion = await db.configuracionBancaria.findUnique({
+    where: { id },
+  })
+
+  if (!configuracion) {
+    notFound()
   }
 
   return (
@@ -44,10 +60,10 @@ export default async function NuevaCuentaBancariaPage() {
         </Button>
         <div>
           <h1 className="text-3xl font-bold text-white">
-            Agregar cuenta bancaria
+            Editar cuenta bancaria
           </h1>
           <p className="text-zinc-400 mt-1">
-            Configura una nueva cuenta para recibir transferencias
+            Modifica los datos de la cuenta: {configuracion.banco}
           </p>
         </div>
       </div>
@@ -64,13 +80,24 @@ export default async function NuevaCuentaBancariaPage() {
                 Datos de la cuenta
               </CardTitle>
               <CardDescription className="text-zinc-400">
-                Ingresa los detalles bancarios que verán los jugadores al pagar
+                Modifica los detalles bancarios que verán los jugadores al pagar
               </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="pt-6">
-          <BancoForm />
+          <BancoForm
+            initialData={{
+              id: configuracion.id,
+              banco: configuracion.banco,
+              tipoCuenta: configuracion.tipoCuenta,
+              numeroCuenta: configuracion.numeroCuenta,
+              titular: configuracion.titular,
+              cbu: configuracion.cbu || '',
+              alias: configuracion.alias || '',
+              activo: configuracion.activo,
+            }}
+          />
         </CardContent>
       </Card>
     </div>

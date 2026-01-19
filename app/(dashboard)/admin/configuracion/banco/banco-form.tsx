@@ -118,7 +118,7 @@ export function BancoForm({ initialData }: BancoFormProps) {
                 <FormControl>
                   <Input
                     placeholder="Ej: Banco Provincia"
-                    className="bg-zinc-800/50 border-zinc-700 focus:border-emerald-500 focus:ring-emerald-500/20 h-11"
+                    className="bg-zinc-800/50 border-zinc-700 focus:border-emerald-500 focus:ring-emerald-500/20 h-11 text-white placeholder:text-zinc-500"
                     {...field}
                   />
                 </FormControl>
@@ -138,21 +138,21 @@ export function BancoForm({ initialData }: BancoFormProps) {
                 </FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="bg-zinc-800/50 border-zinc-700 focus:border-emerald-500 focus:ring-emerald-500/20 h-11">
+                    <SelectTrigger className="bg-zinc-800/50 border-zinc-700 focus:border-emerald-500 focus:ring-emerald-500/20 h-11 text-white">
                       <SelectValue placeholder="Selecciona el tipo de cuenta" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="bg-zinc-800 border-zinc-700">
-                    <SelectItem value="Caja de Ahorro">
+                    <SelectItem value="Caja de Ahorro" className="text-white hover:bg-zinc-700 focus:bg-zinc-700">
                       Caja de Ahorro
                     </SelectItem>
-                    <SelectItem value="Cuenta Corriente">
+                    <SelectItem value="Cuenta Corriente" className="text-white hover:bg-zinc-700 focus:bg-zinc-700">
                       Cuenta Corriente
                     </SelectItem>
-                    <SelectItem value="Cuenta Virtual">
+                    <SelectItem value="Cuenta Virtual" className="text-white hover:bg-zinc-700 focus:bg-zinc-700">
                       Cuenta Virtual (CVU)
                     </SelectItem>
                   </SelectContent>
@@ -177,7 +177,7 @@ export function BancoForm({ initialData }: BancoFormProps) {
                 <FormControl>
                   <Input
                     placeholder="Ej: 012-345678/9"
-                    className="bg-zinc-800/50 border-zinc-700 focus:border-emerald-500 focus:ring-emerald-500/20 h-11 font-mono"
+                    className="bg-zinc-800/50 border-zinc-700 focus:border-emerald-500 focus:ring-emerald-500/20 h-11 font-mono text-white placeholder:text-zinc-500"
                     {...field}
                   />
                 </FormControl>
@@ -198,7 +198,7 @@ export function BancoForm({ initialData }: BancoFormProps) {
                 <FormControl>
                   <Input
                     placeholder="Nombre completo del titular"
-                    className="bg-zinc-800/50 border-zinc-700 focus:border-emerald-500 focus:ring-emerald-500/20 h-11"
+                    className="bg-zinc-800/50 border-zinc-700 focus:border-emerald-500 focus:ring-emerald-500/20 h-11 text-white placeholder:text-zinc-500"
                     {...field}
                   />
                 </FormControl>
@@ -226,7 +226,7 @@ export function BancoForm({ initialData }: BancoFormProps) {
                     <Input
                       placeholder="22 dígitos"
                       maxLength={22}
-                      className="bg-zinc-900/50 border-zinc-700 focus:border-emerald-500 focus:ring-emerald-500/20 h-11 font-mono tracking-wider"
+                      className="bg-zinc-900/50 border-zinc-700 focus:border-emerald-500 focus:ring-emerald-500/20 h-11 font-mono tracking-wider text-white placeholder:text-zinc-500"
                       {...field}
                     />
                   </FormControl>
@@ -247,7 +247,7 @@ export function BancoForm({ initialData }: BancoFormProps) {
                   <FormControl>
                     <Input
                       placeholder="mi.alias.banco"
-                      className="bg-zinc-900/50 border-zinc-700 focus:border-emerald-500 focus:ring-emerald-500/20 h-11 font-mono"
+                      className="bg-zinc-900/50 border-zinc-700 focus:border-emerald-500 focus:ring-emerald-500/20 h-11 font-mono text-white placeholder:text-zinc-500"
                       {...field}
                     />
                   </FormControl>
